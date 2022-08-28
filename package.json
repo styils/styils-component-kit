@@ -30,6 +30,7 @@
     "@babel/types": "^7.18.13",
     "@commitlint/cli": "17.1.1",
     "@commitlint/config-conventional": "17.1.0",
+    "@jest/types": "^29.0.1",
     "@swc/core": "^1.2.244",
     "@swc/jest": "^0.2.22",
     "@types/babel-plugin-macros": "^2.8.5",

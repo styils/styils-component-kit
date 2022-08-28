@@ -1,10 +1,10 @@
 /**
  * process.env.JEST_EASY from jest-easy
  * don't add collectCoverageFrom when using vscode plugin
- * /
+ */
+import { Config } from '@jest/types'
 
-/** @type {import('@jest/types').Config.InitialOptions} */
-export default {
+export default <Config.InitialOptions>{
   collectCoverageFrom: process.env.JEST_EASY
     ? (memo: string[]) => {
         return memo.concat(['!**/*.spec.{ts,tsx}', '!**/*.d.ts'])

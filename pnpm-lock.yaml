@@ -10,6 +10,7 @@ importers:
       '@babel/types': ^7.18.13
       '@commitlint/cli': 17.1.1
       '@commitlint/config-conventional': 17.1.0
+      '@jest/types': ^29.0.1
       '@swc/core': ^1.2.244
       '@swc/jest': ^0.2.22
       '@types/babel-plugin-macros': ^2.8.5
@@ -44,6 +45,7 @@ importers:
       '@babel/types': 7.18.13
       '@commitlint/cli': 17.1.1_ts-node@10.9.1
       '@commitlint/config-conventional': 17.1.0
+      '@jest/types': 29.0.1
       '@swc/core': 1.2.244
       '@swc/jest': 0.2.22_@swc+core@1.2.244
       '@types/babel-plugin-macros': 2.8.5
@@ -509,9 +511,6 @@ packages:
     engines: {node: '>=v14'}
     peerDependencies:
       ts-node: '>=10'
-    peerDependenciesMeta:
-      ts-node:
-        optional: true
     dependencies:
       '@commitlint/config-validator': 17.1.0
       '@commitlint/execute-rule': 17.0.0
@@ -1983,9 +1982,6 @@ packages:
       cosmiconfig: '>=7'
       ts-node: '>=10'
       typescript: '>=3'
-    peerDependenciesMeta:
-      ts-node:
-        optional: true
     dependencies:
       '@types/node': 14.18.26
       cosmiconfig: 7.0.1
