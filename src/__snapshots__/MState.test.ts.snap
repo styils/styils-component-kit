@@ -1,0 +1,43 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`macro state react base 1`] = `
+"import { useState as _useState } from "react";
+export default () => {
+  const [count, _setcount] = _useState(0);
+
+  return (
+    <button onClick={() => _setcount((_count) => (_count += 1))}>
+      Clicked {count} {count === 1 ? "time" : "times"}
+    </button>
+  );
+};
+"
+`;
+
+exports[`macro state react hook 1`] = `
+"import { useState as _useState } from "react";
+export default function useHook() {
+  const [v, _setv] = _useState(false);
+
+  const s = () => {
+    _setv((_v) => (_v = !_v));
+  };
+
+  return [v, s];
+}
+"
+`;
+
+exports[`macro state vue base 1`] = `
+"import { useState as _useState } from "react";
+export default function useHook() {
+  const [v, _setv] = _useState(false);
+
+  const s = () => {
+    _setv((_v) => (_v = !_v));
+  };
+
+  return [v, s];
+}
+"
+`;
