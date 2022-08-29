@@ -11,14 +11,10 @@ function getInitState(path: NodePath): Argument {
   return callExpression.node.arguments[0]
 }
 
-const hookCacheId = {
-  vue: null,
-  react: null,
-  soild: null
-}
+const hookCacheId = new Map()
 
 export function MState(path: NodePath, options: MParams) {
-  const { opts } = options
+  const { opts, file } = options
 
   const variableDeclaration = path.findParent((p) =>
     t.isVariableDeclaration(p)
@@ -35,8 +31,8 @@ export function MState(path: NodePath, options: MParams) {
   switch (opts.frame) {
     case 'react':
       {
-        const hookId = hookCacheId.react ?? addNamed(path, 'useState', 'react')
-        hookCacheId.react = hookId
+        const hookId = hookCacheId.get(file.code) ?? addNamed(path, 'useState', 'react')
+        hookCacheId.set(file.code, hookCacheId)
         const updater = path.scope.generateUidIdentifier(`set${stateVariable.node.name}`)
 
         variableDeclaration.insertAfter(
@@ -85,8 +81,8 @@ export function MState(path: NodePath, options: MParams) {
       break
     case 'vue':
       {
-        const hookId = hookCacheId.vue ?? addNamed(path, 'ref', 'vue')
-        hookCacheId.vue = hookId
+        const hookId = hookCacheId.get(file.code) ?? addNamed(path, 'ref', 'vue')
+        hookCacheId.set(file.code, hookId)
 
         variableDeclaration.insertAfter(
           t.variableDeclaration('const', [

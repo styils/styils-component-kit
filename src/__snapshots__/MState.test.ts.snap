@@ -15,7 +15,8 @@ export default () => {
 `;
 
 exports[`macro state react hook 1`] = `
-"export default function useHook() {
+"import { useState as _useState } from "react";
+export default function useHook() {
   const [v, _setv] = _useState(false);
 
   const s = () => {
@@ -47,7 +48,8 @@ export default () => {
 `;
 
 exports[`macro state vue state object 1`] = `
-"export default () => {
+"import { ref as _ref } from "vue";
+export default () => {
   const count = _ref({
     a: 1,
   });
