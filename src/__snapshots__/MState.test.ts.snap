@@ -15,8 +15,7 @@ export default () => {
 `;
 
 exports[`macro state react hook 1`] = `
-"import { useState as _useState } from "react";
-export default function useHook() {
+"export default function useHook() {
   const [v, _setv] = _useState(false);
 
   const s = () => {
@@ -29,15 +28,45 @@ export default function useHook() {
 `;
 
 exports[`macro state vue base 1`] = `
-"import { useState as _useState } from "react";
-export default function useHook() {
-  const [v, _setv] = _useState(false);
+"import { ref as _ref } from "vue";
+export default () => {
+  const count = _ref(0);
 
-  const s = () => {
-    _setv((_v) => (_v = !_v));
-  };
+  function hello() {
+    let count = 1;
+    count++;
+  }
 
-  return [v, s];
-}
+  return (
+    <button onClick={() => (count.value += 1)}>
+      Clicked {count.value} {count.value === 1 ? "time" : "times"}
+    </button>
+  );
+};
+"
+`;
+
+exports[`macro state vue state object 1`] = `
+"export default () => {
+  const count = _ref({
+    a: 1,
+  });
+
+  const foo = _ref([1, 2, 3]);
+
+  function hello() {
+    let count = 1;
+    count++;
+  }
+
+  return (
+    <button onClick={() => (count.value.a += 1)}>
+      Clicked {count.value.a} {count.value.a === 1 ? "time" : "times"}
+      {foo.value.map((i) => (
+        <span>{i}</span>
+      ))}
+    </button>
+  );
+};
 "
 `;
