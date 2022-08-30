@@ -13,7 +13,7 @@ function getInitState(path: NodePath): Argument {
 
 const hookCacheId = new Map()
 
-export function MState(path: NodePath, options: MParams) {
+export function state(path: NodePath, options: MParams) {
   const { opts, file } = options
 
   const variableDeclaration = path.findParent((p) =>
@@ -70,6 +70,7 @@ export function MState(path: NodePath, options: MParams) {
               functionDeclaration.scope.hasOwnBinding(IPath.node.name) &&
               t.isCallExpression(IPath.parentPath)
             ) {
+              // handling set methods
               setIdentifiers.push(IPath.parentPath as NodePath<t.CallExpression>)
             }
 
@@ -106,7 +107,10 @@ export function MState(path: NodePath, options: MParams) {
         })
 
         setIdentifiers.forEach((item) => {
-          if (t.isBinaryExpression(item.node.arguments[0])) {
+          if (
+            t.isBinaryExpression(item.node.arguments[0]) ||
+            t.isArrayExpression(item.node.arguments[0])
+          ) {
             item.replaceWith(
               t.assignmentExpression(
                 '=',
@@ -118,20 +122,28 @@ export function MState(path: NodePath, options: MParams) {
               )
             )
           } else if (t.isObjectExpression(item.node.arguments[0])) {
+            const statement = []
             item.node.arguments[0].properties.forEach((property) => {
               if (t.isObjectProperty(property)) {
-                item.insertAfter(
-                  t.assignmentExpression(
-                    '=',
-                    t.memberExpression(
-                      stateVariable.node.elements[0] as t.Expression,
-                      t.memberExpression(t.identifier('value'), property.key)
-                    ),
-                    property.value as t.Expression
+                statement.push(
+                  t.expressionStatement(
+                    t.assignmentExpression(
+                      '=',
+                      t.memberExpression(
+                        t.memberExpression(
+                          stateVariable.node.elements[0] as t.Expression,
+                          t.identifier('value')
+                        ),
+                        property.key
+                      ),
+                      property.value as t.Expression
+                    )
                   )
                 )
               }
             })
+
+            item.replaceWith(t.blockStatement(statement))
           }
         })
       }

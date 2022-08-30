@@ -1,11 +1,11 @@
 import { createMacro } from 'babel-plugin-macros'
-import { MState } from './MState'
-import { MProps } from './MProps'
+import { state as IState } from './state'
+import { proper as IProper } from './proper'
 
 export declare function state<T>(initialState: T): T
 
 export default createMacro(({ references, state }) => {
-  if (references.MState) references.MState.forEach((path) => MState(path, state))
+  if (references.state) references.state.forEach((path) => IState(path, state))
 
-  if (references.MProps) references.MProps.forEach((path) => MProps(path, state))
+  if (references.proper) references.proper.forEach((path) => IProper(path, state))
 })

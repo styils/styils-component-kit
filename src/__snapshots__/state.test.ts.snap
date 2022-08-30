@@ -78,6 +78,32 @@ export default () => {
 "
 `;
 
+exports[`macro state vue state arr 1`] = `
+"import { ref as _ref } from "vue";
+export default () => {
+  const count = _ref({
+    a: 1,
+  });
+
+  const foo = _ref([1, 2, 3]);
+
+  function hello() {
+    let count = 1;
+    count++;
+  }
+
+  return (
+    <button onClick={() => (foo.value = [...count.value, count.value.a + 1])}>
+      Clicked {count.value.a} {count.value.a === 1 ? "time" : "times"}
+      {foo.value.map((i) => (
+        <span>{i}</span>
+      ))}
+    </button>
+  );
+};
+"
+`;
+
 exports[`macro state vue state object 1`] = `
 "import { ref as _ref } from "vue";
 export default () => {
@@ -93,7 +119,11 @@ export default () => {
   }
 
   return (
-    <button onClick={() => setCount({ ...count.value, a: count.value.a + 1 })}>
+    <button
+      onClick={() => {
+        count.value.a = count.value.a + 1;
+      }}
+    >
       Clicked {count.value.a} {count.value.a === 1 ? "time" : "times"}
       {foo.value.map((i) => (
         <span>{i}</span>

@@ -1,0 +1,41 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`use props base react 1`] = `
+"export default (props) => {
+  const { foo, bar } = props;
+  return (
+    <button>
+      Clicked {foo} {bar === 1 ? "time" : "times"}
+    </button>
+  );
+};
+"
+`;
+
+exports[`use props base solid 1`] = `
+"import { splitProps as _splitProps } from "solid-js";
+export default (props) => {
+  const [_local, rest] = _splitProps(props, ["foo", "bar"]);
+
+  return (
+    <button {...rest}>
+      Clicked {_local.foo} {_local.bar === 1 ? "time" : "times"}
+    </button>
+  );
+};
+"
+`;
+
+exports[`use props base vue 1`] = `
+"import { toRefs as _toRefs } from "vue";
+export default (props) => {
+  const { foo, bar } = _toRefs(props);
+
+  return (
+    <button>
+      Clicked {foo.value} {bar.value === 1 ? "time" : "times"}
+    </button>
+  );
+};
+"
+`;
