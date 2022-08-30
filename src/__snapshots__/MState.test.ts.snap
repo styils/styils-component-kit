@@ -3,10 +3,10 @@
 exports[`macro state react base 1`] = `
 "import { useState as _useState } from "react";
 export default () => {
-  const [count, _setcount] = _useState(0);
+  const [count, setCount] = _useState(0);
 
   return (
-    <button onClick={() => _setcount((_count) => (_count += 1))}>
+    <button onClick={() => setCount(count + 1)}>
       Clicked {count} {count === 1 ? "time" : "times"}
     </button>
   );
@@ -17,14 +17,45 @@ export default () => {
 exports[`macro state react hook 1`] = `
 "import { useState as _useState } from "react";
 export default function useHook() {
-  const [v, _setv] = _useState(false);
+  const [v, setV] = _useState(false);
 
   const s = () => {
-    _setv((_v) => (_v = !_v));
+    setV(!v);
   };
 
   return [v, s];
 }
+"
+`;
+
+exports[`macro state solid base 1`] = `
+"import { createSignal as _createSignal } from "solid-js";
+export default () => {
+  const [count, setCount] = _createSignal(0);
+
+  return (
+    <button onClick={() => setCount(count() + 1)}>
+      Clicked {count()} {count() === 1 ? "time" : "times"}
+    </button>
+  );
+};
+"
+`;
+
+exports[`macro state solid object 1`] = `
+"import { createSignal as _createSignal } from "solid-js";
+export default () => {
+  const [count, setCount] = _createSignal({
+    a: 1,
+    b: 2,
+  });
+
+  return (
+    <button onClick={() => setCount({ ...count(), a: count().a + 1 })}>
+      Clicked {count().b} {count().a === 1 ? "time" : "times"}
+    </button>
+  );
+};
 "
 `;
 
@@ -39,7 +70,7 @@ export default () => {
   }
 
   return (
-    <button onClick={() => (count.value += 1)}>
+    <button onClick={() => (count.value = count.value + 1)}>
       Clicked {count.value} {count.value === 1 ? "time" : "times"}
     </button>
   );
@@ -62,7 +93,7 @@ export default () => {
   }
 
   return (
-    <button onClick={() => (count.value.a += 1)}>
+    <button onClick={() => setCount({ ...count.value, a: count.value.a + 1 })}>
       Clicked {count.value.a} {count.value.a === 1 ? "time" : "times"}
       {foo.value.map((i) => (
         <span>{i}</span>

@@ -7,10 +7,10 @@ describe('macro state', () => {
     import { MState } from 'macro'
 
     export default () => {
-      let count = MState(0)
+      const [count, setCount] = MState(0)
 
       return (
-        <button onClick={() => (count += 1)}>
+        <button onClick={() => setCount(count + 1)}>
           Clicked {count} {count === 1 ? 'time' : 'times'}
         </button>
       )
@@ -28,10 +28,10 @@ describe('macro state', () => {
       import { MState } from 'macro'
 
       export default function useHook() {
-        let v = MState(false)
+        const [v, setV] = MState(false)
 
         const s = () => {
-          v = !v
+          setV(!v)
         }
 
         return [v, s]
@@ -49,7 +49,7 @@ describe('macro state', () => {
       import { MState } from 'macro'
 
       export default () => {
-        let count = MState(0)
+        const [count, setCount] = MState(0)
 
         function hello(){
           let count = 1
@@ -57,7 +57,7 @@ describe('macro state', () => {
         }
 
         return (
-          <button onClick={() => (count += 1)}>
+          <button onClick={() => (setCount(count + 1))}>
             Clicked {count} {count === 1 ? 'time' : 'times'}
           </button>
         )
@@ -75,8 +75,8 @@ describe('macro state', () => {
       import { MState } from 'macro'
 
       export default () => {
-        const count = MState({ a:1 })
-        const foo = MState([1,2,3])
+        const [count, setCount] = MState({ a:1 })
+        const [foo, setFoo] = MState([1,2,3])
 
         function hello(){
           let count = 1
@@ -84,7 +84,7 @@ describe('macro state', () => {
         }
 
         return (
-          <button onClick={() => (count.a += 1)}>
+          <button onClick={() => setCount({...count, a:count.a + 1})}>
             Clicked {count.a} {count.a === 1 ? 'time' : 'times'}
             {foo.map((i)=> <span>{i}</span>)}
           </button>
@@ -92,6 +92,48 @@ describe('macro state', () => {
       }
     `,
       { frame: 'vue' }
+    )
+
+    expect(code).toMatchSnapshot()
+  })
+
+  it('solid base', () => {
+    const code = getCode(
+      `
+      import { MState } from 'macro'
+
+      export default () => {
+        const [count, setCount] = MState(0)
+
+        return (
+          <button onClick={() => setCount(count + 1)}>
+            Clicked {count} {count === 1 ? 'time' : 'times'}
+          </button>
+        )
+      }
+    `,
+      { frame: 'solid' }
+    )
+
+    expect(code).toMatchSnapshot()
+  })
+
+  it('solid object', () => {
+    const code = getCode(
+      `
+      import { MState } from 'macro'
+
+      export default () => {
+        const [count, setCount] = MState({a:1,b:2})
+
+        return (
+          <button onClick={() => setCount({...count, a: count.a + 1})}>
+            Clicked {count.b} {count.a === 1 ? 'time' : 'times'}
+          </button>
+        )
+      }
+    `,
+      { frame: 'solid' }
     )
 
     expect(code).toMatchSnapshot()
