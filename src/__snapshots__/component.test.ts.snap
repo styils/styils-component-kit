@@ -52,7 +52,7 @@ export default {
       )
     );
 
-    return (
+    () => (
       <button {...rest}>
         Clicked {foo.value} {bar.value === 1 ? "time" : "times"}
         {_slots_.children()}
@@ -75,7 +75,7 @@ export default {
   ) {
     const { foo, bar } = _toRefs(props);
 
-    return (
+    () => (
       <button {...rest}>
         Clicked {foo.value} {bar.value === 1 ? "time" : "times"}
         {_slots_.children()}

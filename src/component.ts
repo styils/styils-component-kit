@@ -8,8 +8,18 @@ export function component(path: NodePath, options: MParams) {
   if (opts.frame === 'vue') {
     if (
       t.isCallExpression(path.parentPath.node) &&
-      t.isArrowFunctionExpression(path.parentPath.node.arguments[0])
+      (t.isArrowFunctionExpression(path.parentPath.node.arguments[0]) ||
+        t.isFunctionExpression(path.parentPath.node.arguments[0]))
     ) {
+      const { start } = path.parentPath.node.arguments[0]
+      path.parentPath.traverse({
+        ReturnStatement(RPath) {
+          if (RPath.getFunctionParent().node.start === start) {
+            RPath.replaceWith(t.arrowFunctionExpression([], RPath.node.argument))
+          }
+        }
+      })
+
       path.parentPath.replaceWith(
         t.objectExpression([
           t.objectProperty(t.identifier('inheritAttrs'), t.booleanLiteral(false)),

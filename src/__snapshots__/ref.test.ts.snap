@@ -1,0 +1,44 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`use ref base react 1`] = `
+"import { useRef as _useRef } from "react";
+export default (props) => {
+  const buttonRef = _useRef(null);
+
+  buttonRef.current += 1;
+  return (
+    <button ref={buttonRef}>
+      Clicked {foo} {bar === 1 ? "time" : "times"}
+    </button>
+  );
+};
+"
+`;
+
+exports[`use ref base solid 1`] = `
+"export default (props) => {
+  let buttonRef = 0;
+  buttonRef += 1;
+  return (
+    <button ref={buttonRef}>
+      Clicked {foo} {bar === 1 ? "time" : "times"}
+    </button>
+  );
+};
+"
+`;
+
+exports[`use ref base vue 1`] = `
+"import { ref as _ref } from "vue";
+export default (props) => {
+  let buttonRef = _ref(0);
+
+  buttonRef.value += 1;
+  return (
+    <button ref={buttonRef}>
+      Clicked {foo} {bar === 1 ? "time" : "times"}
+    </button>
+  );
+};
+"
+`;
