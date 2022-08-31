@@ -22,9 +22,29 @@ export function proper(path: NodePath, options: MParams) {
       break
     case 'vue':
       {
-        const hookId = addNamed(path, 'toRefs', 'vue')
+        const hookToRefsId = addNamed(path, 'toRefs', 'vue')
 
-        path.parentPath.replaceWith(t.callExpression(hookId, path.parentPath.node.arguments))
+        if (path.parentPath.node.arguments.length === 2) {
+          const hookReadonlyId = addNamed(path, 'readonly', 'vue')
+          const hookReactiveId = addNamed(path, 'reactive', 'vue')
+
+          path.parentPath.replaceWith(
+            t.callExpression(hookToRefsId, [
+              t.callExpression(hookReadonlyId, [
+                t.callExpression(hookReactiveId, [
+                  t.objectExpression([
+                    t.spreadElement(path.parentPath.node.arguments[1] as t.Expression),
+                    t.spreadElement(path.parentPath.node.arguments[0] as t.Expression)
+                  ])
+                ])
+              ])
+            ])
+          )
+        } else {
+          path.parentPath.replaceWith(
+            t.callExpression(hookToRefsId, path.parentPath.node.arguments)
+          )
+        }
 
         if (variableDeclarator && t.isObjectPattern(variableDeclarator.node.id)) {
           const Identifiers: NodePath<t.Identifier>[] = []
@@ -33,7 +53,11 @@ export function proper(path: NodePath, options: MParams) {
           const statementNames = variableDeclarator.node.id.properties.reduce(
             (memo, item, index, arr) => {
               if (t.isObjectProperty(item) && t.isIdentifier(item.value)) {
-                memo[item.value.name] = item.value.start
+                if (item.value.name === 'children') {
+                  arr[index] = null
+                } else {
+                  memo[item.value.name] = item.value.start
+                }
               }
 
               if (t.isRestElement(item) && t.isIdentifier(item.argument)) {
@@ -46,6 +70,8 @@ export function proper(path: NodePath, options: MParams) {
             {}
           )
 
+          let childrenPath: NodePath<t.Node> | null = null
+
           functionDeclaration.traverse({
             Identifier(IPath) {
               if (
@@ -54,14 +80,29 @@ export function proper(path: NodePath, options: MParams) {
                 statementNames[IPath.node.name] !== IPath.node.start &&
                 // and new replacement nodes, new node without start
                 IPath.node.start &&
+                !t.isObjectProperty(IPath.parentPath) &&
                 functionDeclaration.scope.hasOwnBinding(IPath.node.name)
               ) {
                 Identifiers.push(IPath)
               }
+
+              if (IPath.node.name === 'children') {
+                childrenPath = IPath
+              }
             }
           })
 
+          if (childrenPath) {
+            childrenPath.replaceWith(
+              t.callExpression(
+                t.memberExpression(t.identifier('_slots_'), t.identifier('children')),
+                []
+              )
+            )
+          }
+
           if (t.isObjectExpression(functionDeclaration.parentPath.node)) {
+            // handle rest
             functionDeclaration.parentPath.node.properties.forEach((item) => {
               if (
                 t.isObjectMethod(item) &&
@@ -123,14 +164,31 @@ export function proper(path: NodePath, options: MParams) {
           variableDeclarator.node.id = t.arrayPattern(restElement ? [local, restElement] : [local])
 
           const Identifiers: { path: NodePath<t.Identifier>; name: string }[] = []
-          path.parentPath.replaceWith(
-            t.callExpression(hookId, [
-              path.parentPath.node.arguments[0],
-              t.arrayExpression(
-                Object.keys(statementNames).map((item) => t.stringLiteral(statementNames[item].key))
-              )
-            ])
-          )
+
+          if (path.parentPath.node.arguments.length === 2) {
+            const hookMergePropsId = addNamed(path, 'mergeProps', 'solid-js')
+            path.parentPath.replaceWith(
+              t.callExpression(hookId, [
+                t.callExpression(hookMergePropsId, path.parentPath.node.arguments.reverse()),
+                t.arrayExpression(
+                  Object.keys(statementNames).map((item) =>
+                    t.stringLiteral(statementNames[item].key)
+                  )
+                )
+              ])
+            )
+          } else {
+            path.parentPath.replaceWith(
+              t.callExpression(hookId, [
+                path.parentPath.node.arguments[0],
+                t.arrayExpression(
+                  Object.keys(statementNames).map((item) =>
+                    t.stringLiteral(statementNames[item].key)
+                  )
+                )
+              ])
+            )
+          }
 
           functionDeclaration.traverse({
             Identifier(IPath) {

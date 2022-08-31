@@ -15,11 +15,11 @@ exports[`use props base react 1`] = `
 exports[`use props base solid 1`] = `
 "import { splitProps as _splitProps } from "solid-js";
 export default (props) => {
-  const [_local, rest] = _splitProps(props, ["foo", "bar"]);
+  const [_local_, rest] = _splitProps(props, ["foo", "bar"]);
 
   return (
     <button {...rest}>
-      Clicked {_local.foo} {_local.bar === 1 ? "time" : "times"}
+      Clicked {_local_.foo} {_local_.bar === 1 ? "time" : "times"}
     </button>
   );
 };
@@ -34,6 +34,29 @@ export default (props) => {
   return (
     <button>
       Clicked {foo.value} {bar.value === 1 ? "time" : "times"}
+    </button>
+  );
+};
+"
+`;
+
+exports[`use props solid merge props 1`] = `
+"import { mergeProps as _mergeProps } from "solid-js";
+import { splitProps as _splitProps } from "solid-js";
+export default (props) => {
+  const [_local_, rest] = _splitProps(
+    _mergeProps(
+      {
+        foo: "1",
+      },
+      props
+    ),
+    ["foo", "bar"]
+  );
+
+  return (
+    <button {...rest}>
+      Clicked {_local_.foo} {_local_.bar === 1 ? "time" : "times"}
     </button>
   );
 };

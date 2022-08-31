@@ -63,4 +63,25 @@ describe('use props', () => {
 
     expect(code).toMatchSnapshot()
   })
+
+  it('solid merge props', () => {
+    const code = getCode(
+      `
+    import { proper } from 'macro'
+
+    export default (props) => {
+      const {foo:foo1, bar, ...rest} = proper(props, {foo:'1'})
+
+      return (
+        <button {...rest}>
+          Clicked {foo1} {bar === 1 ? 'time' : 'times'}
+        </button>
+      )
+    }
+    `,
+      { frame: 'solid' }
+    )
+
+    expect(code).toMatchSnapshot()
+  })
 })

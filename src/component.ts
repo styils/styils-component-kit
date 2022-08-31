@@ -30,5 +30,7 @@ export function component(path: NodePath, options: MParams) {
         ])
       )
     }
+  } else if (t.isCallExpression(path.parentPath.node)) {
+    path.parentPath.replaceWith(path.parentPath.node.arguments[0])
   }
 }

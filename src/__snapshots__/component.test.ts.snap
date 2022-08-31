@@ -1,6 +1,69 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`use component base react 1`] = `
+"export default (props) => {
+  const { foo, bar, ...rest } = props;
+  return (
+    <button {...rest}>
+      Clicked {foo} {bar === 1 ? "time" : "times"}
+    </button>
+  );
+};
+"
+`;
+
+exports[`use component base solid 1`] = `
+"import { splitProps as _splitProps } from "solid-js";
+
+const button = (props) => {
+  const [_local_, rest] = _splitProps(props, ["foo", "bar"]);
+
+  return (
+    <button {...rest}>
+      Clicked {_local_.foo} {_local_.bar === 1 ? "time" : "times"}
+    </button>
+  );
+};
+
+export default button;
+"
+`;
+
 exports[`use component base vue 1`] = `
+"import { reactive as _reactive } from "vue";
+import { readonly as _readonly } from "vue";
+import { toRefs as _toRefs } from "vue";
+export default {
+  props: ["foo", "bar"],
+  inheritAttrs: false,
+
+  setup(
+    props,
+    { attrs: rest, slots: _slots_, emit: _emit_, expose: _expose_ }
+  ) {
+    const { foo, bar } = _toRefs(
+      _readonly(
+        _reactive({
+          ...{
+            foo: 1,
+          },
+          ...props,
+        })
+      )
+    );
+
+    return (
+      <button {...rest}>
+        Clicked {foo.value} {bar.value === 1 ? "time" : "times"}
+        {_slots_.children()}
+      </button>
+    );
+  },
+};
+"
+`;
+
+exports[`use component vue not default props 1`] = `
 "import { toRefs as _toRefs } from "vue";
 export default {
   props: ["foo", "bar"],
@@ -15,6 +78,7 @@ export default {
     return (
       <button {...rest}>
         Clicked {foo.value} {bar.value === 1 ? "time" : "times"}
+        {_slots_.children()}
       </button>
     );
   },
