@@ -28,13 +28,23 @@ export function proper(path: NodePath, options: MParams) {
 
         if (variableDeclarator && t.isObjectPattern(variableDeclarator.node.id)) {
           const Identifiers: NodePath<t.Identifier>[] = []
-          const statementNames = variableDeclarator.node.id.properties.reduce((memo, item) => {
-            if (t.isObjectProperty(item) && t.isIdentifier(item.value)) {
-              memo[item.value.name] = item.value.start
-            }
+          let restElement: string | null = null
 
-            return memo
-          }, {})
+          const statementNames = variableDeclarator.node.id.properties.reduce(
+            (memo, item, index, arr) => {
+              if (t.isObjectProperty(item) && t.isIdentifier(item.value)) {
+                memo[item.value.name] = item.value.start
+              }
+
+              if (t.isRestElement(item) && t.isIdentifier(item.argument)) {
+                restElement = item.argument.name
+                arr[index] = null
+              }
+
+              return memo
+            },
+            {}
+          )
 
           functionDeclaration.traverse({
             Identifier(IPath) {
@@ -50,6 +60,34 @@ export function proper(path: NodePath, options: MParams) {
               }
             }
           })
+
+          if (t.isObjectExpression(functionDeclaration.parentPath.node)) {
+            functionDeclaration.parentPath.node.properties.forEach((item) => {
+              if (
+                t.isObjectMethod(item) &&
+                t.isIdentifier(item.key) &&
+                item.key.name === 'setup' &&
+                t.isObjectPattern(item.params[1])
+              ) {
+                item.params[1].properties.forEach((PPath) => {
+                  if (
+                    t.isObjectProperty(PPath) &&
+                    t.isIdentifier(PPath.key) &&
+                    PPath.key.name === 'attrs'
+                  ) {
+                    PPath.value = t.identifier(restElement)
+                  }
+                })
+              }
+            })
+
+            functionDeclaration.parentPath.node.properties.unshift(
+              t.objectProperty(
+                t.identifier('props'),
+                t.arrayExpression(Identifiers.map((item) => t.stringLiteral(item.node.name)))
+              )
+            )
+          }
 
           Identifiers.forEach((item) => {
             item.replaceWith(
@@ -80,7 +118,7 @@ export function proper(path: NodePath, options: MParams) {
             return memo
           }, {})
 
-          const local = t.identifier('_local')
+          const local = t.identifier('_local_')
 
           variableDeclarator.node.id = t.arrayPattern(restElement ? [local, restElement] : [local])
 

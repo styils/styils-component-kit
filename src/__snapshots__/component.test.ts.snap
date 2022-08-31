@@ -1,0 +1,23 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`use component base vue 1`] = `
+"import { toRefs as _toRefs } from "vue";
+export default {
+  props: ["foo", "bar"],
+  inheritAttrs: false,
+
+  setup(
+    props,
+    { attrs: rest, slots: _slots_, emit: _emit_, expose: _expose_ }
+  ) {
+    const { foo, bar } = _toRefs(props);
+
+    return (
+      <button {...rest}>
+        Clicked {foo.value} {bar.value === 1 ? "time" : "times"}
+      </button>
+    );
+  },
+};
+"
+`;
