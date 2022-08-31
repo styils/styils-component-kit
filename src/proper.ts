@@ -18,7 +18,14 @@ export function proper(path: NodePath, options: MParams) {
 
   switch (opts.frame) {
     case 'react':
-      path.parentPath.replaceWith(path.parentPath.node.arguments[0])
+      path.parentPath.replaceWith(
+        path.parentPath.node.arguments[1]
+          ? t.objectExpression([
+              t.spreadElement(path.parentPath.node.arguments[1] as t.Expression),
+              t.spreadElement(path.parentPath.node.arguments[0] as t.Expression)
+            ])
+          : path.parentPath.node.arguments[0]
+      )
       break
     case 'vue':
       {

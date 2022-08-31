@@ -40,6 +40,23 @@ export default (props) => {
 "
 `;
 
+exports[`use props react merge props 1`] = `
+"export default (props) => {
+  const { foo, bar } = {
+    ...{
+      foo: 1,
+    },
+    ...props,
+  };
+  return (
+    <button>
+      Clicked {foo} {bar === 1 ? "time" : "times"}
+    </button>
+  );
+};
+"
+`;
+
 exports[`use props solid merge props 1`] = `
 "import { mergeProps as _mergeProps } from "solid-js";
 import { splitProps as _splitProps } from "solid-js";
@@ -57,6 +74,31 @@ export default (props) => {
   return (
     <button {...rest}>
       Clicked {_local_.foo} {_local_.bar === 1 ? "time" : "times"}
+    </button>
+  );
+};
+"
+`;
+
+exports[`use props vue merge props 1`] = `
+"import { reactive as _reactive } from "vue";
+import { readonly as _readonly } from "vue";
+import { toRefs as _toRefs } from "vue";
+export default (props) => {
+  const { foo, bar } = _toRefs(
+    _readonly(
+      _reactive({
+        ...{
+          foo: 1,
+        },
+        ...props,
+      })
+    )
+  );
+
+  return (
+    <button>
+      Clicked {foo.value} {bar.value === 1 ? "time" : "times"}
     </button>
   );
 };

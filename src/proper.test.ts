@@ -22,6 +22,27 @@ describe('use props', () => {
     expect(code).toMatchSnapshot()
   })
 
+  it('react merge props', () => {
+    const code = getCode(
+      `
+    import { proper } from 'macro'
+
+    export default (props) => {
+      const {foo, bar} = proper(props, {foo:1})
+
+      return (
+        <button>
+          Clicked {foo} {bar === 1 ? 'time' : 'times'}
+        </button>
+      )
+    }
+    `,
+      { frame: 'react' }
+    )
+
+    expect(code).toMatchSnapshot()
+  })
+
   it('base vue', () => {
     const code = getCode(
       `
@@ -29,6 +50,27 @@ describe('use props', () => {
 
     export default (props) => {
       const {foo, bar} = proper(props)
+
+      return (
+        <button>
+          Clicked {foo} {bar === 1 ? 'time' : 'times'}
+        </button>
+      )
+    }
+    `,
+      { frame: 'vue' }
+    )
+
+    expect(code).toMatchSnapshot()
+  })
+
+  it('vue merge props', () => {
+    const code = getCode(
+      `
+    import { proper } from 'macro'
+
+    export default (props) => {
+      const {foo, bar} = proper(props, {foo:1})
 
       return (
         <button>
