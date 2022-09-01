@@ -1,10 +1,9 @@
 import type { NodePath } from '@babel/core'
-import { addNamed } from '@babel/helper-module-imports'
 import { MParams } from './types'
 import * as t from '@babel/types'
 
 export function proper(path: NodePath, options: MParams, idxMaps: Set<string>) {
-  const { opts } = options
+  const { opts, addImportName } = options
 
   const variableDeclarator = path.findParent((p) =>
     t.isVariableDeclarator(p)
@@ -18,46 +17,42 @@ export function proper(path: NodePath, options: MParams, idxMaps: Set<string>) {
 
   const functionDeclaration = path.getFunctionParent()!
 
-  if (!t.isCallExpression(path.parentPath.node)) {
-    return
-  }
+  const parentPathNode = path.parentPath.node as t.CallExpression
 
   switch (opts.frame) {
     case 'react':
       path.parentPath.replaceWith(
-        path.parentPath.node.arguments[1]
+        parentPathNode.arguments[1]
           ? t.objectExpression([
-              t.spreadElement(path.parentPath.node.arguments[1] as t.Expression),
-              t.spreadElement(path.parentPath.node.arguments[0] as t.Expression)
+              t.spreadElement(parentPathNode.arguments[1] as t.Expression),
+              t.spreadElement(parentPathNode.arguments[0] as t.Expression)
             ])
-          : path.parentPath.node.arguments[0]
+          : parentPathNode.arguments[0]
       )
 
       break
     case 'vue':
       {
-        const hookToRefsId = addNamed(path, 'toRefs', 'vue')
+        const hookToRefsId = addImportName(path, 'toRefs', 'vue')
 
-        if (path.parentPath.node.arguments.length === 2) {
-          const hookReadonlyId = addNamed(path, 'readonly', 'vue')
-          const hookReactiveId = addNamed(path, 'reactive', 'vue')
+        if (parentPathNode.arguments.length === 2) {
+          const hookReadonlyId = addImportName(path, 'readonly', 'vue')
+          const hookReactiveId = addImportName(path, 'reactive', 'vue')
 
           path.parentPath.replaceWith(
             t.callExpression(hookToRefsId, [
               t.callExpression(hookReadonlyId, [
                 t.callExpression(hookReactiveId, [
                   t.objectExpression([
-                    t.spreadElement(path.parentPath.node.arguments[1] as t.Expression),
-                    t.spreadElement(path.parentPath.node.arguments[0] as t.Expression)
+                    t.spreadElement(parentPathNode.arguments[1] as t.Expression),
+                    t.spreadElement(parentPathNode.arguments[0] as t.Expression)
                   ])
                 ])
               ])
             ])
           )
         } else {
-          path.parentPath.replaceWith(
-            t.callExpression(hookToRefsId, path.parentPath.node.arguments)
-          )
+          path.parentPath.replaceWith(t.callExpression(hookToRefsId, parentPathNode.arguments))
         }
 
         if (variableDeclarator && t.isObjectPattern(variableDeclarator.node.id)) {
@@ -154,7 +149,7 @@ export function proper(path: NodePath, options: MParams, idxMaps: Set<string>) {
       break
     case 'solid':
       {
-        const hookId = addNamed(path, 'splitProps', 'solid-js')
+        const nameId = addImportName(path, 'splitProps', 'solid-js')
         if (variableDeclarator && t.isObjectPattern(variableDeclarator.node.id)) {
           let restElement: t.Identifier | null = null
           const statementNames = variableDeclarator.node.id.properties.reduce((memo, item) => {
@@ -179,11 +174,11 @@ export function proper(path: NodePath, options: MParams, idxMaps: Set<string>) {
 
           const Identifiers: { path: NodePath<t.Identifier>; name: string }[] = []
 
-          if (path.parentPath.node.arguments.length === 2) {
-            const hookMergePropsId = addNamed(path, 'mergeProps', 'solid-js')
+          if (parentPathNode.arguments.length === 2) {
+            const hookMergePropsId = addImportName(path, 'mergeProps', 'solid-js')
             path.parentPath.replaceWith(
-              t.callExpression(hookId, [
-                t.callExpression(hookMergePropsId, path.parentPath.node.arguments.reverse()),
+              t.callExpression(nameId, [
+                t.callExpression(hookMergePropsId, parentPathNode.arguments.reverse()),
                 t.arrayExpression(
                   Object.keys(statementNames).map((item) =>
                     t.stringLiteral(statementNames[item].key)
@@ -193,8 +188,8 @@ export function proper(path: NodePath, options: MParams, idxMaps: Set<string>) {
             )
           } else {
             path.parentPath.replaceWith(
-              t.callExpression(hookId, [
-                path.parentPath.node.arguments[0],
+              t.callExpression(nameId, [
+                parentPathNode.arguments[0],
                 t.arrayExpression(
                   Object.keys(statementNames).map((item) =>
                     t.stringLiteral(statementNames[item].key)

@@ -1,10 +1,9 @@
 import type { NodePath } from '@babel/core'
-import { addNamed } from '@babel/helper-module-imports'
 import { MParams } from './types'
 import * as t from '@babel/types'
 
 export function ref(path: NodePath, options: MParams) {
-  const { opts } = options
+  const { opts, addImportName } = options
 
   if (!t.isCallExpression(path.parentPath.node)) {
     return
@@ -13,8 +12,8 @@ export function ref(path: NodePath, options: MParams) {
   switch (opts.frame) {
     case 'react':
       {
-        const hookId = addNamed(path, 'useRef', 'react')
-        path.parentPath.replaceWith(t.callExpression(hookId, path.parentPath.node.arguments))
+        const nameId = addImportName(path, 'useRef', 'react')
+        path.parentPath.replaceWith(t.callExpression(nameId, path.parentPath.node.arguments))
 
         const stateVariable = path
           .find((p) => t.isVariableDeclarator(p))!
@@ -54,8 +53,8 @@ export function ref(path: NodePath, options: MParams) {
       break
     case 'vue':
       {
-        const hookId = addNamed(path, 'ref', 'vue')
-        path.parentPath.replaceWith(t.callExpression(hookId, path.parentPath.node.arguments))
+        const nameId = addImportName(path, 'ref', 'vue')
+        path.parentPath.replaceWith(t.callExpression(nameId, path.parentPath.node.arguments))
 
         const stateVariable = path
           .find((p) => t.isVariableDeclarator(p))!

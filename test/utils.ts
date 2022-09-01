@@ -10,7 +10,7 @@ export function getCode(code: string, options: Record<string, any> = {}) {
       parserOpts: {
         plugins: ['jsx']
       }
-    })?.code,
+    })?.code ?? '',
     { parser: 'babel' }
   )
 }

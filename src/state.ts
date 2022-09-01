@@ -1,6 +1,5 @@
 import * as t from '@babel/types'
 import { NodePath } from '@babel/core'
-import { addNamed } from '@babel/helper-module-imports'
 import { MParams } from './types'
 import { Scope } from '@babel/traverse'
 
@@ -11,10 +10,8 @@ function getInitState(path: NodePath): Argument {
   return callExpression.node.arguments[0]
 }
 
-const hookCacheId = new Map()
-
 export function state(path: NodePath, options: MParams, idxMaps: Set<string>) {
-  const { opts, file } = options
+  const { opts, addImportName } = options
 
   const variableDeclaration = path.findParent((p) =>
     t.isVariableDeclaration(p)
@@ -31,31 +28,27 @@ export function state(path: NodePath, options: MParams, idxMaps: Set<string>) {
   switch (opts.frame) {
     case 'react':
       {
-        const cacheCode = file.code + 'useState'
-        const hookId = hookCacheId.get(cacheCode) ?? addNamed(path, 'useState', 'react')
-        hookCacheId.set(cacheCode, hookCacheId)
+        const nameId = addImportName(path, 'useState', 'react')
 
         idxMaps.add((stateVariable.node.elements[0] as t.Identifier).name)
 
         variableDeclaration.insertAfter(
           t.variableDeclaration('const', [
-            t.variableDeclarator(stateVariable.node, t.callExpression(hookId, [initState]))
+            t.variableDeclarator(stateVariable.node, t.callExpression(nameId, [initState]))
           ])
         )
       }
       break
     case 'vue':
       {
-        const cacheCode = file.code + 'ref'
-        const hookId = hookCacheId.get(cacheCode) ?? addNamed(path, 'ref', 'vue')
-        hookCacheId.set(cacheCode, hookId)
+        const nameId = addImportName(path, 'ref', 'vue')
 
         // use const to create ref
         variableDeclaration.insertAfter(
           t.variableDeclaration('const', [
             t.variableDeclarator(
               stateVariable.node.elements[0],
-              t.callExpression(hookId, [initState])
+              t.callExpression(nameId, [initState])
             )
           ])
         )
@@ -155,13 +148,11 @@ export function state(path: NodePath, options: MParams, idxMaps: Set<string>) {
       break
     case 'solid':
       {
-        const cacheCode = file.code + 'createSignal'
-        const hookId = hookCacheId.get(cacheCode) ?? addNamed(path, 'createSignal', 'solid-js')
-        hookCacheId.set(cacheCode, hookId)
+        const nameId = addImportName(path, 'createSignal', 'solid-js')
 
         variableDeclaration.insertAfter(
           t.variableDeclaration('const', [
-            t.variableDeclarator(stateVariable.node, t.callExpression(hookId, [initState]))
+            t.variableDeclarator(stateVariable.node, t.callExpression(nameId, [initState]))
           ])
         )
 
@@ -231,9 +222,7 @@ export function state(path: NodePath, options: MParams, idxMaps: Set<string>) {
           }
         })
 
-        const cacheBatchCode = file.code + 'batch'
-        const hookBatchId = hookCacheId.get(cacheBatchCode) ?? addNamed(path, 'batch', 'solid-js')
-        hookCacheId.set(cacheBatchCode, hookId)
+        const nameBatchId = addImportName(path, 'batch', 'solid-js')
 
         setBlock.forEach((item, SPath) => {
           if (item > 1) {
@@ -246,9 +235,8 @@ export function state(path: NodePath, options: MParams, idxMaps: Set<string>) {
                   t.variableDeclarator(
                     t.identifier(SPath.node.id.name),
                     t.arrowFunctionExpression(
-                      // @ts-expect-error params
-                      params,
-                      t.callExpression(hookBatchId, [
+                      params as t.Identifier[],
+                      t.callExpression(nameBatchId, [
                         t.functionExpression(null, SPath.node.params, SPath.node.body)
                       ])
                     )
@@ -258,9 +246,8 @@ export function state(path: NodePath, options: MParams, idxMaps: Set<string>) {
             } else {
               SPath.replaceWith(
                 t.arrowFunctionExpression(
-                  // @ts-expect-error params
-                  params,
-                  t.callExpression(hookBatchId, [SPath.node as t.ArrowFunctionExpression])
+                  params as t.Identifier[],
+                  t.callExpression(nameBatchId, [SPath.node as t.ArrowFunctionExpression])
                 )
               )
             }

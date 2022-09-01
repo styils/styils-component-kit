@@ -1,10 +1,9 @@
 import type { NodePath } from '@babel/core'
-import { addNamed } from '@babel/helper-module-imports'
 import { MParams } from './types'
 import * as t from '@babel/types'
 
 export function useMount(path: NodePath, options: MParams) {
-  const { opts } = options
+  const { opts, addImportName } = options
 
   if (!t.isCallExpression(path.parentPath.node)) {
     return
@@ -13,24 +12,24 @@ export function useMount(path: NodePath, options: MParams) {
   switch (opts.frame) {
     case 'react':
       {
-        const hookId = addNamed(path, 'useEffect', 'react')
+        const nameId = addImportName(path, 'useEffect', 'react')
 
-        path.replaceWith(hookId)
+        path.replaceWith(nameId)
         path.parentPath.node.arguments.push(t.arrayExpression([]))
       }
       break
     case 'vue':
       {
-        const hookId = addNamed(path, 'onMounted', 'vue')
+        const nameId = addImportName(path, 'onMounted', 'vue')
 
-        path.replaceWith(hookId)
+        path.replaceWith(nameId)
       }
       break
     case 'solid':
       {
-        const hookId = addNamed(path, 'onMount', 'solid-js')
+        const nameId = addImportName(path, 'onMount', 'solid-js')
 
-        path.replaceWith(hookId)
+        path.replaceWith(nameId)
       }
       break
   }

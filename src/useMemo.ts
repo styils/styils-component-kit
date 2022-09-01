@@ -1,10 +1,9 @@
 import type { NodePath } from '@babel/core'
-import { addNamed } from '@babel/helper-module-imports'
 import { MParams } from './types'
 import * as t from '@babel/types'
 
 export function useMemo(path: NodePath, options: MParams, idxMaps: Set<string>) {
-  const { opts } = options
+  const { opts, addImportName } = options
 
   if (!t.isCallExpression(path.parentPath.node)) {
     return
@@ -13,7 +12,7 @@ export function useMemo(path: NodePath, options: MParams, idxMaps: Set<string>) 
   switch (opts.frame) {
     case 'react':
       {
-        const hookId = addNamed(path, 'useMemo', 'react')
+        const nameId = addImportName(path, 'useMemo', 'react')
         const deps = []
         path.parentPath.traverse({
           Identifier(IPath) {
@@ -24,20 +23,20 @@ export function useMemo(path: NodePath, options: MParams, idxMaps: Set<string>) 
         })
 
         path.parentPath.node.arguments[1] = t.arrayExpression(deps)
-        path.replaceWith(hookId)
+        path.replaceWith(nameId)
       }
       break
     case 'vue':
       {
-        const hookId = addNamed(path, 'computed', 'vue')
-        path.replaceWith(hookId)
+        const nameId = addImportName(path, 'computed', 'vue')
+        path.replaceWith(nameId)
         path.parentPath.node.arguments[1] = null
       }
       break
     case 'solid':
       {
-        const hookId = addNamed(path, 'createMemo', 'solid-js')
-        path.replaceWith(hookId)
+        const nameId = addImportName(path, 'createMemo', 'solid-js')
+        path.replaceWith(nameId)
         path.parentPath.node.arguments[1] = null
       }
       break

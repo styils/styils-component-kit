@@ -1,41 +1,50 @@
 import { createMacro } from 'babel-plugin-macros'
-import { state as IState } from './state'
-import { proper as IProper } from './proper'
-import { component as IComponent } from './component'
-import { ref as IRef } from './ref'
-import { useMount as IUseMounted } from './useMount'
-import { useMemo as IUseMemo } from './useMemo'
-import { useWatchEffect as IUseWatchEffect } from './useWatchEffect'
+import * as t from '@babel/types'
+import { addNamed } from '@babel/helper-module-imports'
+import type { NodePath } from '@babel/core'
+import { component } from './component'
+import { state } from './state'
+import { proper } from './proper'
+import { ref } from './ref'
+import { useMount } from './useMount'
+import { useMemo } from './useMemo'
+import { useWatchEffect } from './useWatchEffect'
 
-export declare function state<T>(initialState: T): [T, <V extends T>(value: V) => void]
+/**
+ * Avoid importing multiple identical methods
+ */
+const hookCacheId = new Map()
 
-export declare function component<T>(component: T): T
-
-export declare function ref<T>(initialRef: T): T
-
-export declare function proper<T>(initialProps: T): T
-
-export declare function useMount(func: Function): void
-
-export declare function useMemo<Func extends (...args: any[]) => any>(func: Func): ReturnType<Func>
-
-export declare function useWatchEffect(func: Function): void
-
-export default createMacro(({ references, state }) => {
+export default createMacro(({ references, state: babelState, babel }) => {
+  /**
+   * used to get all props states
+   * Used to get all props state, auto-populate react deps
+   */
   const idxMaps = new Set([])
 
-  if (references.component) references.component.forEach((path) => IComponent(path, state))
+  const options = {
+    // `import .. form ..` helper method
+    addImportName: (path: NodePath, name: string, source: string) => {
+      const cacheCode = babelState.file.code + name
 
-  if (references.state) references.state.forEach((path) => IState(path, state, idxMaps))
+      const nameId = hookCacheId.get(cacheCode) ?? addNamed(path, name, source)
+      hookCacheId.set(cacheCode, nameId)
 
-  if (references.ref) references.ref.forEach((path) => IRef(path, state))
+      return nameId
+    },
+    ...babelState
+  }
 
-  if (references.proper) references.proper.forEach((path) => IProper(path, state, idxMaps))
+  // Idenifier needs to be obtained so the order is fixed
+  const macros = [component, state, proper, ref, useMount, useMemo, useWatchEffect]
 
-  if (references.useMount) references.useMount.forEach((path) => IUseMounted(path, state))
+  macros.forEach((macro) => {
+    references[macro.name]?.forEach((path) => {
+      if (!babel.types.isCallExpression(path.parentPath.node)) {
+        return
+      }
 
-  if (references.useMemo) references.useMemo.forEach((path) => IUseMemo(path, state, idxMaps))
-
-  if (references.useWatchEffect)
-    references.useWatchEffect.forEach((path) => IUseWatchEffect(path, state, idxMaps))
+      macro(path, options, idxMaps)
+    })
+  })
 })
