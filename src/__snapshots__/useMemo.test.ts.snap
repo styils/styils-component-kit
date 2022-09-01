@@ -2,8 +2,9 @@
 
 exports[`use useMemo base react 1`] = `
 "import { useMemo as _useMemo } from "react";
+import { useState as _useState } from "react";
 export default (props) => {
-  const [count, setCount] = _ref(0);
+  const [count, setCount] = _useState(0);
 
   const value = _useMemo(() => {
     return count;

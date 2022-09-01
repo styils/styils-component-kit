@@ -12,7 +12,10 @@
     "resolveJsonModule": true,
     "outDir": "lib",
     "baseUrl": ".",
-    "declaration": true
+    "declaration": true,
+    "paths": {
+      "test/*": ["test"]
+    }
   },
   "include": ["src", "types.d.ts", "src/.ts"]
 }

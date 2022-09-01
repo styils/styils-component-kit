@@ -34,6 +34,12 @@ import { createSignal as _createSignal } from "solid-js";
 export default () => {
   const [count, setCount] = _createSignal(0);
 
+  function hello() {
+    let count = 1;
+    count++;
+  }
+
+  setCount(count + 1);
   return (
     <button onClick={() => setCount(count() + 1)}>
       Clicked {count()} {count() === 1 ? "time" : "times"}
@@ -111,6 +117,10 @@ export default () => {
   function hello() {
     let count = 1;
     count++;
+  }
+
+  function foo() {
+    count.value = 1;
   }
 
   return (

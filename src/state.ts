@@ -86,7 +86,7 @@ export function state(path: NodePath, options: MParams, idxMaps: Set<string>) {
               IPath.node.start &&
               functionDeclaration.scope.hasOwnBinding(IPath.node.name)
             ) {
-              const IPathParent = IPath.parentPath.parentPath
+              const IPathParent = IPath.parentPath.parentPath.node
 
               // If it is an assignment expression
               // the current scope is saved
@@ -191,7 +191,7 @@ export function state(path: NodePath, options: MParams, idxMaps: Set<string>) {
               IPath.node.start &&
               functionDeclaration.scope.hasOwnBinding(IPath.node.name)
             ) {
-              const IPathParent = IPath.parentPath.parentPath
+              const IPathParent = IPath.parentPath.parentPath.node
 
               // If it is an assignment expression
               // the current scope is saved
@@ -268,6 +268,16 @@ export function state(path: NodePath, options: MParams, idxMaps: Set<string>) {
         })
 
         Identifiers.forEach((item) => {
+          if (t.isUpdateExpression(item.parentPath.node)) {
+            item.parentPath.replaceWith(
+              t.binaryExpression(
+                item.parentPath.node.operator[0] as '-' | '+',
+                item.node,
+                t.numericLiteral(1)
+              )
+            )
+          }
+
           idxMaps.add(item.node.name)
           item.replaceWith(t.callExpression(t.identifier(item.node.name), []))
         })

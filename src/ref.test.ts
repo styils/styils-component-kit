@@ -1,4 +1,4 @@
-import { getCode } from '../tests'
+import { getCode } from 'test'
 
 describe('use ref', () => {
   it('base react', () => {

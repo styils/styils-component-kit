@@ -2,6 +2,7 @@
  * process.env.JEST_EASY from jest-easy
  * don't add collectCoverageFrom when using vscode plugin
  */
+const path = require('path')
 
 module.exports = {
   collectCoverageFrom: process.env.JEST_EASY
@@ -15,7 +16,10 @@ module.exports = {
       '@swc/jest',
       {
         jsc: {
-          target: 'es2021'
+          target: 'es2021',
+          paths: {
+            test: [path.join(__dirname, 'test/')]
+          }
         },
         sourceMaps: 'inline'
       }

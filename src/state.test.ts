@@ -1,4 +1,4 @@
-import { getCode } from '../tests'
+import { getCode } from 'test'
 
 describe('macro state', () => {
   it('react base', () => {
@@ -54,6 +54,10 @@ describe('macro state', () => {
         function hello(){
           let count = 1
           count++
+        }
+
+        function foo(){
+          count = 1
         }
 
         return (
@@ -132,6 +136,12 @@ describe('macro state', () => {
 
       export default () => {
         const [count, setCount] = state(0)
+
+        function hello(){
+          let count = 1
+          count++
+        }
+        setCount(count++)
 
         return (
           <button onClick={() => setCount(count + 1)}>
