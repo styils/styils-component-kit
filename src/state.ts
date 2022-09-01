@@ -31,8 +31,9 @@ export function state(path: NodePath, options: MParams, idxMaps: Set<string>) {
   switch (opts.frame) {
     case 'react':
       {
-        const hookId = hookCacheId.get(file.code) ?? addNamed(path, 'useState', 'react')
-        hookCacheId.set(file.code, hookCacheId)
+        const cacheCode = file.code + 'useState'
+        const hookId = hookCacheId.get(cacheCode) ?? addNamed(path, 'useState', 'react')
+        hookCacheId.set(cacheCode, hookCacheId)
 
         idxMaps.add((stateVariable.node.elements[0] as t.Identifier).name)
 
@@ -45,8 +46,9 @@ export function state(path: NodePath, options: MParams, idxMaps: Set<string>) {
       break
     case 'vue':
       {
-        const hookId = hookCacheId.get(file.code) ?? addNamed(path, 'ref', 'vue')
-        hookCacheId.set(file.code, hookId)
+        const cacheCode = file.code + 'ref'
+        const hookId = hookCacheId.get(cacheCode) ?? addNamed(path, 'ref', 'vue')
+        hookCacheId.set(cacheCode, hookId)
 
         // use const to create ref
         variableDeclaration.insertAfter(
@@ -153,8 +155,9 @@ export function state(path: NodePath, options: MParams, idxMaps: Set<string>) {
       break
     case 'solid':
       {
-        const hookId = hookCacheId.get(file.code) ?? addNamed(path, 'createSignal', 'solid-js')
-        hookCacheId.set(file.code, hookId)
+        const cacheCode = file.code + 'createSignal'
+        const hookId = hookCacheId.get(cacheCode) ?? addNamed(path, 'createSignal', 'solid-js')
+        hookCacheId.set(cacheCode, hookId)
 
         variableDeclaration.insertAfter(
           t.variableDeclaration('const', [
@@ -227,24 +230,38 @@ export function state(path: NodePath, options: MParams, idxMaps: Set<string>) {
             }
           }
         })
-        const hookBatchId = addNamed(path, 'batch', 'solid-js')
+
+        const cacheBatchCode = file.code + 'batch'
+        const hookBatchId = hookCacheId.get(cacheBatchCode) ?? addNamed(path, 'batch', 'solid-js')
+        hookCacheId.set(cacheBatchCode, hookId)
 
         setBlock.forEach((item, SPath) => {
           if (item > 1) {
+            const { params } = SPath.node
+
+            SPath.node.params = []
             if (t.isFunctionDeclaration(SPath.node)) {
               SPath.replaceWith(
                 t.variableDeclaration('const', [
                   t.variableDeclarator(
                     t.identifier(SPath.node.id.name),
-                    t.callExpression(hookBatchId, [
-                      t.functionExpression(null, SPath.node.params, SPath.node.body)
-                    ])
+                    t.arrowFunctionExpression(
+                      // @ts-expect-error params
+                      params,
+                      t.callExpression(hookBatchId, [
+                        t.functionExpression(null, SPath.node.params, SPath.node.body)
+                      ])
+                    )
                   )
                 ])
               )
             } else {
               SPath.replaceWith(
-                t.callExpression(hookBatchId, [SPath.node as t.ArrowFunctionExpression])
+                t.arrowFunctionExpression(
+                  // @ts-expect-error params
+                  params,
+                  t.callExpression(hookBatchId, [SPath.node as t.ArrowFunctionExpression])
+                )
               )
             }
           }

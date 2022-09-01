@@ -53,22 +53,26 @@ export default () => {
     setCount();
   };
 
-  const onClickB = _batch(function () {
-    setCount();
-    setCount();
-  });
+  const onClickB = () =>
+    _batch(function () {
+      setCount();
+      setCount();
+    });
 
-  const onClickC = _batch(function (foo) {
-    setCount(foo);
-    setCount(foo);
-  });
+  const onClickC = (foo) =>
+    _batch(function () {
+      setCount(foo);
+      setCount(foo);
+    });
 
   return (
     <button
-      onClick={_batch(() => {
-        setCount(count() + 1);
-        setCount(count() + 1);
-      })}
+      onClick={() =>
+        _batch(() => {
+          setCount(count() + 1);
+          setCount(count() + 1);
+        })
+      }
     >
       <div onClick={onClickA}></div>
       <div onClick={onClickB}></div>
