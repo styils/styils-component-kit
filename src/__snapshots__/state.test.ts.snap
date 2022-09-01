@@ -29,7 +29,8 @@ export default function useHook() {
 `;
 
 exports[`macro state solid base 1`] = `
-"import { createSignal as _createSignal } from "solid-js";
+"import { batch as _batch } from "solid-js";
+import { createSignal as _createSignal } from "solid-js";
 export default () => {
   const [count, setCount] = _createSignal(0);
 
@@ -42,8 +43,47 @@ export default () => {
 "
 `;
 
+exports[`macro state solid batch 1`] = `
+"import { batch as _batch } from "solid-js";
+import { createSignal as _createSignal } from "solid-js";
+export default () => {
+  const [count, setCount] = _createSignal(0);
+
+  const onClickA = () => {
+    setCount();
+  };
+
+  const onClickB = _batch(function () {
+    setCount();
+    setCount();
+  });
+
+  const onClickC = _batch(function (foo) {
+    setCount(foo);
+    setCount(foo);
+  });
+
+  return (
+    <button
+      onClick={_batch(() => {
+        setCount(count() + 1);
+        setCount(count() + 1);
+      })}
+    >
+      <div onClick={onClickA}></div>
+      <div onClick={onClickB}></div>
+      <div onClick={onClickC}></div>
+      <div onClick={() => setCount(count() + 1)}></div>
+      Clicked {count()} {count() === 1 ? "time" : "times"}
+    </button>
+  );
+};
+"
+`;
+
 exports[`macro state solid object 1`] = `
-"import { createSignal as _createSignal } from "solid-js";
+"import { batch as _batch } from "solid-js";
+import { createSignal as _createSignal } from "solid-js";
 export default () => {
   const [count, setCount] = _createSignal({
     a: 1,

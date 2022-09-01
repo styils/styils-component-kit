@@ -163,10 +163,23 @@ export function state(path: NodePath, options: MParams, idxMaps: Set<string>) {
         )
 
         const Identifiers: NodePath<t.Identifier>[] = []
-
+        const setIdentifiers: NodePath<t.CallExpression>[] = []
         let currentScope: Scope
         functionDeclaration.traverse({
           Identifier(IPath) {
+            if (
+              IPath.node.name === (stateVariable.node.elements[1] as t.Identifier).name &&
+              // exclude initialization nodes
+              stateVariable.node.start !== IPath.node.start &&
+              // and new replacement nodes, new node without start
+              IPath.node.start &&
+              functionDeclaration.scope.hasOwnBinding(IPath.node.name) &&
+              t.isCallExpression(IPath.parentPath)
+            ) {
+              // handling set methods
+              setIdentifiers.push(IPath.parentPath as NodePath<t.CallExpression>)
+            }
+
             if (
               IPath.node.name === (stateVariable.node.elements[0] as t.Identifier).name &&
               // exclude initialization nodes
@@ -196,6 +209,43 @@ export function state(path: NodePath, options: MParams, idxMaps: Set<string>) {
               ) {
                 Identifiers.push(IPath)
               }
+            }
+          }
+        })
+
+        const setBlock = new Map<NodePath<t.Function>, number>()
+
+        setIdentifiers.forEach((item) => {
+          const func = item.getFunctionParent()
+
+          if (func && func.node.start !== functionDeclaration.node.start) {
+            const num = setBlock.get(func)
+            if (num) {
+              setBlock.set(func, num + 1)
+            } else {
+              setBlock.set(func, 1)
+            }
+          }
+        })
+        const hookBatchId = addNamed(path, 'batch', 'solid-js')
+
+        setBlock.forEach((item, SPath) => {
+          if (item > 1) {
+            if (t.isFunctionDeclaration(SPath.node)) {
+              SPath.replaceWith(
+                t.variableDeclaration('const', [
+                  t.variableDeclarator(
+                    t.identifier(SPath.node.id.name),
+                    t.callExpression(hookBatchId, [
+                      t.functionExpression(null, SPath.node.params, SPath.node.body)
+                    ])
+                  )
+                ])
+              )
+            } else {
+              SPath.replaceWith(
+                t.callExpression(hookBatchId, [SPath.node as t.ArrowFunctionExpression])
+              )
             }
           }
         })

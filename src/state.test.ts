@@ -166,4 +166,46 @@ describe('macro state', () => {
 
     expect(code).toMatchSnapshot()
   })
+
+  it('solid batch', () => {
+    const code = getCode(
+      `
+      import { state } from 'macro'
+
+      export default () => {
+        const [count, setCount] = state(0)
+
+        const onClickA = () => {
+          setCount()
+        }
+
+        const onClickB = function(){
+          setCount()
+          setCount()
+        }
+
+        function onClickC(foo){
+          setCount(foo)
+          setCount(foo)
+        }
+
+        return (
+          <button onClick={() => {
+            setCount(count + 1)
+            setCount(count + 1)
+          }}>
+            <div onClick={onClickA}></div>
+            <div onClick={onClickB}></div>
+            <div onClick={onClickC}></div>
+            <div onClick={()=> setCount(count + 1)}></div>
+            Clicked {count} {count === 1 ? 'time' : 'times'}
+          </button>
+        )
+      }
+    `,
+      { frame: 'solid' }
+    )
+
+    expect(code).toMatchSnapshot()
+  })
 })
