@@ -1,0 +1,37 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`use useMount base react 1`] = `
+"import { useEffect as _useEffect } from "react";
+export default (props) => {
+  _useEffect(() => {
+    console.log("hello");
+  }, []);
+
+  return <button>Clicked</button>;
+};
+"
+`;
+
+exports[`use useMount base solid 1`] = `
+"import { onMount as _onMount } from "solid-js";
+export default (props) => {
+  _onMount(() => {
+    console.log("hello");
+  });
+
+  return <button>Clicked</button>;
+};
+"
+`;
+
+exports[`use useMount base vue 1`] = `
+"import { onMounted as _onMounted } from "vue";
+export default (props) => {
+  _onMounted(() => {
+    console.log("hello");
+  });
+
+  return <button>Clicked</button>;
+};
+"
+`;

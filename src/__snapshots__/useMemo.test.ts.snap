@@ -1,0 +1,42 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`use useMemo base react 1`] = `
+"import { useMemo as _useMemo } from "react";
+export default (props) => {
+  const [count, setCount] = _ref(0);
+
+  const value = _useMemo(() => {
+    return count;
+  }, [count]);
+
+  return <button>{value}</button>;
+};
+"
+`;
+
+exports[`use useMemo base solid 1`] = `
+"import { createMemo as _createMemo } from "solid-js";
+export default (props) => {
+  const value = _createMemo(() => {
+    return "foo";
+  });
+
+  return <button>{value}</button>;
+};
+"
+`;
+
+exports[`use useMemo base vue 1`] = `
+"import { computed as _computed } from "vue";
+import { ref as _ref } from "vue";
+export default (props) => {
+  const count = _ref(0);
+
+  const value = _computed(() => {
+    return count.value;
+  });
+
+  return <button>{value}</button>;
+};
+"
+`;

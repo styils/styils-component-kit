@@ -3,12 +3,18 @@ import { addNamed } from '@babel/helper-module-imports'
 import { MParams } from './types'
 import * as t from '@babel/types'
 
-export function proper(path: NodePath, options: MParams) {
+export function proper(path: NodePath, options: MParams, idxMaps: Set<string>) {
   const { opts } = options
 
   const variableDeclarator = path.findParent((p) =>
     t.isVariableDeclarator(p)
   ) as NodePath<t.VariableDeclarator>
+
+  ;(variableDeclarator.node.id as t.ObjectPattern).properties.forEach((item) => {
+    if (t.isObjectProperty(item) && t.isIdentifier(item.value)) {
+      idxMaps.add(item.value.name)
+    }
+  })
 
   const functionDeclaration = path.getFunctionParent()!
 
@@ -26,6 +32,7 @@ export function proper(path: NodePath, options: MParams) {
             ])
           : path.parentPath.node.arguments[0]
       )
+
       break
     case 'vue':
       {

@@ -13,7 +13,7 @@ function getInitState(path: NodePath): Argument {
 
 const hookCacheId = new Map()
 
-export function state(path: NodePath, options: MParams) {
+export function state(path: NodePath, options: MParams, idxMaps: Set<string>) {
   const { opts, file } = options
 
   const variableDeclaration = path.findParent((p) =>
@@ -33,6 +33,8 @@ export function state(path: NodePath, options: MParams) {
       {
         const hookId = hookCacheId.get(file.code) ?? addNamed(path, 'useState', 'react')
         hookCacheId.set(file.code, hookCacheId)
+
+        idxMaps.add((stateVariable.node.elements[0] as t.Identifier).name)
 
         variableDeclaration.insertAfter(
           t.variableDeclaration('const', [
@@ -103,6 +105,7 @@ export function state(path: NodePath, options: MParams) {
         })
 
         Identifiers.forEach((item) => {
+          idxMaps.add(item.node.name)
           item.replaceWith(t.memberExpression(t.identifier(item.node.name), t.identifier('value')))
         })
 
@@ -198,6 +201,7 @@ export function state(path: NodePath, options: MParams) {
         })
 
         Identifiers.forEach((item) => {
+          idxMaps.add(item.node.name)
           item.replaceWith(t.callExpression(t.identifier(item.node.name), []))
         })
       }

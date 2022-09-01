@@ -1,0 +1,39 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`use useWatchEffect base react 1`] = `
+"import { useEffect as _useEffect } from "react";
+export default (props) => {
+  const { foo } = props;
+
+  _useEffect(() => {
+    console.log(foo);
+  }, [foo]);
+
+  return <button>Clicked</button>;
+};
+"
+`;
+
+exports[`use useWatchEffect base solid 1`] = `
+"import { createEffect as _createEffect } from "solid-js";
+export default (props) => {
+  _createEffect(() => {
+    console.log("hello");
+  });
+
+  return <button>Clicked</button>;
+};
+"
+`;
+
+exports[`use useWatchEffect base vue 1`] = `
+"import { watchEffect as _watchEffect } from "vue";
+export default (props) => {
+  _watchEffect(() => {
+    console.log("hello");
+  });
+
+  return <button>Clicked</button>;
+};
+"
+`;
