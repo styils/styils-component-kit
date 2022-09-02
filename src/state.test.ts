@@ -105,6 +105,37 @@ describe('macro state', () => {
     expect(code).toMatchSnapshot()
   })
 
+  it('vue scope state', () => {
+    const code = getCode(
+      `
+      import { state } from 'macro'
+
+      export default () => {
+        const [count, setCount] = state({a:1,b:2})
+
+        if (foo){
+          setCount(count.a++)
+          if (a){
+            if (b){
+              let count = 0
+              setCount(count++)
+            }
+          }
+        }
+
+        return (
+          <button onClick={() => setCount({...count, a: count.a + 1})}>
+            Clicked {count.b} {count.a === 1 ? 'time' : 'times'}
+          </button>
+        )
+      }
+    `,
+      { frame: 'vue' }
+    )
+
+    expect(code).toMatchSnapshot()
+  })
+
   it('vue state arr', () => {
     const code = getCode(
       `
@@ -167,6 +198,37 @@ describe('macro state', () => {
 
       export default () => {
         const [count, setCount] = state({a:1,b:2})
+
+        return (
+          <button onClick={() => setCount({...count, a: count.a + 1})}>
+            Clicked {count.b} {count.a === 1 ? 'time' : 'times'}
+          </button>
+        )
+      }
+    `,
+      { frame: 'solid' }
+    )
+
+    expect(code).toMatchSnapshot()
+  })
+
+  it('solid scope state', () => {
+    const code = getCode(
+      `
+      import { state } from 'macro'
+
+      export default () => {
+        const [count, setCount] = state({a:1,b:2})
+
+        if (foo){
+          setCount(count.a++)
+          if (a){
+            if (b){
+              let count = 0
+              setCount(count++)
+            }
+          }
+        }
 
         return (
           <button onClick={() => setCount({...count, a: count.a + 1})}>

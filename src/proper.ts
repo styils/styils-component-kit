@@ -2,26 +2,31 @@ import type { NodePath } from '@babel/core'
 import { MParams, Frame } from './types'
 import * as t from '@babel/types'
 
-export function proper(path: NodePath, options: MParams, idxMaps: Set<string>) {
-  const { opts, addImportName, currentVariableDeclarator, currentCallExpression, currentFunction } =
-    options
-
+export function proper(path: NodePath, options: MParams, variableMaps: Set<string>) {
+  const { opts, addImportName } = options
+  // currentVariableDeclarator, currentCallExpression, currentFunction
   // must be deconstructed
+  const currentFunction = path.getFunctionParent() as MParams['currentFunction']
+
   if (
-    t.isVariableDeclarator(currentVariableDeclarator) &&
-    t.isObjectPattern(currentVariableDeclarator.id)
+    t.isVariableDeclarator(path.parentPath.parentPath.node) &&
+    t.isObjectPattern(path.parentPath.parentPath.node.id)
   ) {
-    currentVariableDeclarator.id.properties.forEach((item) => {
+    path.parentPath.parentPath.node.id.properties.forEach((item) => {
       if (t.isObjectProperty(item) && t.isIdentifier(item.value)) {
-        idxMaps.add(item.value.name)
+        variableMaps.add(item.value.name)
       }
     })
   } else {
     throw new Error('must use destructuring')
   }
 
-  const { properties: variableDeclaratorProperties } = currentVariableDeclarator.id
-  const [props, defaultProps] = currentCallExpression.node.arguments
+  if (!t.isCallExpression(path.parentPath.node)) {
+    throw new Error('must be called directly')
+  }
+
+  const { properties: variableDeclaratorProperties } = path.parentPath.parentPath.node.id
+  const [props, defaultProps] = path.parentPath.node.arguments
 
   const mergeProps = defaultProps
     ? t.objectExpression([
@@ -52,6 +57,7 @@ export function proper(path: NodePath, options: MParams, idxMaps: Set<string>) {
         const Identifiers: NodePath<t.Identifier>[] = []
         let restElement: string | null = null
 
+        // collects the deconstructed values and records the remaining values
         const statementNames = variableDeclaratorProperties.reduce((memo, item, index, arr) => {
           if (t.isObjectProperty(item) && t.isIdentifier(item.value)) {
             if (item.value.name === 'children') {
@@ -80,11 +86,7 @@ export function proper(path: NodePath, options: MParams, idxMaps: Set<string>) {
             ) {
               let scoper = IPath.scope
 
-              while (true) {
-                if (!scoper) {
-                  break
-                }
-
+              while (scoper) {
                 if (scoper.hasOwnBinding(IPath.node.name)) {
                   if (scoper.block.start === path.scope.block.start) {
                     break
@@ -167,7 +169,9 @@ export function proper(path: NodePath, options: MParams, idxMaps: Set<string>) {
 
         // split props object
         const local = t.identifier('_local_')
-        currentVariableDeclarator.id = t.arrayPattern(restElement ? [local, restElement] : [local])
+        path.parentPath.parentPath.node.id = t.arrayPattern(
+          restElement ? [local, restElement] : [local]
+        )
 
         const Identifiers: { path: NodePath<t.Identifier>; name: string }[] = []
 
@@ -184,7 +188,25 @@ export function proper(path: NodePath, options: MParams, idxMaps: Set<string>) {
 
         currentFunction.traverse({
           Identifier(IPath) {
-            if (statementNames[IPath.node.name]) {
+            if (
+              statementNames[IPath.node.name] &&
+              !t.isObjectProperty(IPath.parentPath) &&
+              !t.isVariableDeclarator(IPath.parentPath.node)
+            ) {
+              let scoper = IPath.scope
+
+              while (scoper) {
+                if (scoper.hasOwnBinding(IPath.node.name)) {
+                  if (scoper.block.start === path.scope.block.start) {
+                    break
+                  } else {
+                    return
+                  }
+                }
+
+                scoper = scoper.parent
+              }
+
               Identifiers.push({ path: IPath, name: statementNames[IPath.node.name].key })
             }
           }

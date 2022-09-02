@@ -22,7 +22,7 @@ export default createMacro(({ references, state: babelState }) => {
    * Used to get all props state, auto-populate react deps
    */
   const variableMaps = new Set([])
-  const { component: Icomponent = [], ...macros } = references
+  const { component: Icomponent = [], proper: Iproper = [], ...macros } = references
 
   const createAddImportPath = (path: NodePath) => (name: string, source: string) => {
     const cacheCode = babelState.file.code + name
@@ -35,16 +35,14 @@ export default createMacro(({ references, state: babelState }) => {
 
   // component always stays first
   Icomponent.forEach((path) => {
-    if (!t.isCallExpression(path.parentPath.node)) {
-      // Macros must be called directly, otherwise the correct call cannot be traced
-      throw new Error('All macros must be called')
-    }
-
     component(path, (babelState.opts as { frame: string }).frame)
   })
 
-  // Idenifier needs to be obtained so the order is fixed
-  const macroStateMethods = [state, proper, ref]
+  Iproper.forEach((path) => {
+    proper(path, { addImportName: createAddImportPath(path), ...babelState }, variableMaps)
+  })
+
+  const macroStateMethods = [state, ref]
 
   macroStateMethods.forEach((macro) => {
     macros[macro.name]?.forEach((path) => {
@@ -133,11 +131,7 @@ export default createMacro(({ references, state: babelState }) => {
                 // the assignment always precedes the use
                 let scoper = IPath.scope
 
-                while (true) {
-                  if (!scoper) {
-                    break
-                  }
-
+                while (scoper) {
                   if (scoper.hasOwnBinding(IPath.node.name)) {
                     if (scoper.block.start === path.scope.block.start) {
                       break

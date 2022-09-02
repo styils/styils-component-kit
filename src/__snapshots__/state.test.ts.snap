@@ -109,6 +109,35 @@ export default () => {
 "
 `;
 
+exports[`macro state solid scope state 1`] = `
+"import { batch as _batch } from "solid-js";
+import { createSignal as _createSignal } from "solid-js";
+export default () => {
+  const [count, setCount] = _createSignal({
+    a: 1,
+    b: 2,
+  });
+
+  if (foo) {
+    setCount(count().a++);
+
+    if (a) {
+      if (b) {
+        let count = 0;
+        setCount(count++);
+      }
+    }
+  }
+
+  return (
+    <button onClick={() => setCount({ ...count(), a: count().a + 1 })}>
+      Clicked {count().b} {count().a === 1 ? "time" : "times"}
+    </button>
+  );
+};
+"
+`;
+
 exports[`macro state vue base 1`] = `
 "import { ref as _ref } from "vue";
 export default () => {
@@ -130,6 +159,38 @@ export default () => {
   return (
     <button onClick={() => (count.value = count.value + 1)}>
       Clicked {count.value} {count.value === 1 ? "time" : "times"}
+    </button>
+  );
+};
+"
+`;
+
+exports[`macro state vue scope state 1`] = `
+"import { ref as _ref } from "vue";
+export default () => {
+  const count = _ref({
+    a: 1,
+    b: 2,
+  });
+
+  if (foo) {
+    setCount(count.value.a++);
+
+    if (a) {
+      if (b) {
+        let count = 0;
+        setCount(count++);
+      }
+    }
+  }
+
+  return (
+    <button
+      onClick={() => {
+        count.value.a = count.value.a + 1;
+      }}
+    >
+      Clicked {count.value.b} {count.value.a === 1 ? "time" : "times"}
     </button>
   );
 };

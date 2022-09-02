@@ -90,6 +90,51 @@ export default (props) => {
 "
 `;
 
+exports[`use props solid scope proper 1`] = `
+"import { mergeProps as _mergeProps } from "solid-js";
+import { splitProps as _splitProps } from "solid-js";
+export default (props) => {
+  const [_local_, rest] = _splitProps(
+    _mergeProps(
+      {
+        foo: "1",
+      },
+      props
+    ),
+    ["foo", "bar"]
+  );
+
+  function onclick() {
+    let foo1 = 0;
+
+    if (a == 1) {
+      if (b == 2) {
+        foo1++;
+      }
+    }
+  }
+
+  function onclick1() {
+    _local_.foo++;
+
+    if (a == 1) {
+      let foo1 = 0;
+
+      if (b == 2) {
+        foo1++;
+      }
+    }
+  }
+
+  return (
+    <button {...rest}>
+      Clicked {_local_.foo} {_local_.bar === 1 ? "time" : "times"}
+    </button>
+  );
+};
+"
+`;
+
 exports[`use props vue merge props 1`] = `
 "import { reactive as _reactive } from "vue";
 import { readonly as _readonly } from "vue";
@@ -109,6 +154,53 @@ export default (props) => {
   return (
     <button>
       Clicked {foo.value} {bar.value === 1 ? "time" : "times"}
+    </button>
+  );
+};
+"
+`;
+
+exports[`use props vue scope proper 1`] = `
+"import { reactive as _reactive } from "vue";
+import { readonly as _readonly } from "vue";
+import { toRefs as _toRefs } from "vue";
+export default (props) => {
+  const { foo: foo1, bar } = _toRefs(
+    _readonly(
+      _reactive({
+        ...{
+          foo: "1",
+        },
+        ...props,
+      })
+    )
+  );
+
+  function onclick() {
+    let foo1 = 0;
+
+    if (a == 1) {
+      if (b == 2) {
+        foo1++;
+      }
+    }
+  }
+
+  function onclick1() {
+    foo1.value++;
+
+    if (a == 1) {
+      let foo1 = 0;
+
+      if (b == 2) {
+        foo1++;
+      }
+    }
+  }
+
+  return (
+    <button {...rest}>
+      Clicked {foo1.value} {bar.value === 1 ? "time" : "times"}
     </button>
   );
 };

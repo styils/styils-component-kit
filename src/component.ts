@@ -37,6 +37,11 @@ export function component(path: NodePath, frame: string) {
           )
         ])
       )
+    } else {
+      // Macros must be called directly, otherwise the correct call cannot be traced
+      throw new Error(
+        `'component' must be called directly and a function argument must be received, not a variable`
+      )
     }
   } else if (t.isCallExpression(path.parentPath.node)) {
     path.parentPath.replaceWith(path.parentPath.node.arguments[0])
