@@ -1,7 +1,7 @@
 import { createMacro } from 'babel-plugin-macros'
 import * as t from '@babel/types'
 import { addNamed } from '@babel/helper-module-imports'
-import type { NodePath } from '@babel/core'
+import type { NodePath, Scope } from '@babel/traverse'
 import type { MParams } from './types'
 import { component } from './component'
 import { state } from './state'
@@ -10,7 +10,6 @@ import { ref } from './ref'
 import { useMount } from './useMount'
 import { useMemo } from './useMemo'
 import { useWatchEffect } from './useWatchEffect'
-import type { Scope } from '@babel/traverse'
 
 /**
  * Avoid importing multiple identical methods
@@ -43,7 +42,6 @@ export default createMacro(({ references, state: babelState }) => {
       ) as MParams['currentCallExpression']
 
       const currentFunction = path.getFunctionParent() as MParams['currentFunction']
-
       const currentVariableDeclarator = path.parentPath.parentPath.node
 
       const identifiers: NodePath<t.Identifier>[] = []
@@ -51,80 +49,93 @@ export default createMacro(({ references, state: babelState }) => {
       let currentScope: Scope
 
       if (t.isVariableDeclarator(currentVariableDeclarator)) {
-        let identNodeName: { name: string; start: number } | undefined
-        let setIdentNode: { name: string; start: number } | undefined
-
-        if (t.isIdentifier(currentVariableDeclarator.id)) {
-          identNodeName = {
-            start: currentVariableDeclarator.id.start,
-            name: currentVariableDeclarator.id.name
-          }
-        }
-
         if (
-          t.isArrayPattern(currentVariableDeclarator.id) &&
-          t.isIdentifier(currentVariableDeclarator.id.elements[0])
+          t.isIdentifier(currentVariableDeclarator.id) ||
+          t.isArrayPattern(currentVariableDeclarator.id)
         ) {
-          const [variable, setVariable] = currentVariableDeclarator.id.elements
-          if (t.isIdentifier(variable)) {
+          let identNodeName: { name: string; start: number } | undefined
+          let setIdentNode: { name: string; start: number } | undefined
+
+          if (t.isIdentifier(currentVariableDeclarator.id)) {
             identNodeName = {
-              start: variable.start,
-              name: variable.name
+              start: currentVariableDeclarator.id.start,
+              name: currentVariableDeclarator.id.name
             }
           }
 
-          if (t.isIdentifier(setVariable)) {
-            setIdentNode = {
-              start: setVariable.start,
-              name: setVariable.name
+          if (
+            t.isArrayPattern(currentVariableDeclarator.id) &&
+            t.isIdentifier(currentVariableDeclarator.id.elements[0])
+          ) {
+            const [variable, setVariable] = currentVariableDeclarator.id.elements
+            if (t.isIdentifier(variable)) {
+              identNodeName = {
+                start: variable.start,
+                name: variable.name
+              }
+            }
+
+            if (t.isIdentifier(setVariable)) {
+              setIdentNode = {
+                start: setVariable.start,
+                name: setVariable.name
+              }
             }
           }
-        }
 
-        currentFunction.traverse({
-          Identifier(IPath) {
-            if (
-              setIdentNode &&
-              IPath.node.name === setIdentNode.name &&
-              // exclude initialization nodes
-              setIdentNode.start !== IPath.node.start &&
-              // and new replacement nodes, new node without start
-              IPath.node.start &&
-              currentFunction.scope.hasOwnBinding(IPath.node.name) &&
-              t.isCallExpression(IPath.parentPath)
-            ) {
-              // handling set methods
-              setIdentifiers.push(IPath.parentPath as NodePath<t.CallExpression>)
-            }
-
-            if (
-              identNodeName &&
-              IPath.node.name === identNodeName.name &&
-              // exclude initialization nodes
-              identNodeName.start !== IPath.node.start &&
-              // and new replacement nodes, new node without start
-              IPath.node.start &&
-              currentFunction.scope.hasOwnBinding(IPath.node.name)
-            ) {
-              const IPathParent = IPath.parentPath.parentPath.node
-
-              // If it is an assignment expression
-              // the current scope is saved
-              // the assignment always precedes the use
-              if (t.isVariableDeclaration(IPathParent)) {
-                currentScope = IPath.scope
+          currentFunction?.traverse({
+            Identifier(IPath) {
+              if (
+                setIdentNode &&
+                IPath.node.name === setIdentNode.name &&
+                // exclude initialization nodes
+                setIdentNode.start !== IPath.node.start &&
+                // and new replacement nodes, new node without start
+                IPath.node.start &&
+                currentFunction.scope.hasOwnBinding(IPath.node.name) &&
+                t.isCallExpression(IPath.parentPath)
+              ) {
+                // handling set methods
+                setIdentifiers.push(IPath.parentPath as NodePath<t.CallExpression>)
               }
 
               if (
-                !t.isVariableDeclaration(IPathParent) &&
-                // If it is in the same scope as the assignment expression, it will not be processed
-                currentScope?.block.start !== IPath.scope.block.start
+                identNodeName &&
+                IPath.node.name === identNodeName.name &&
+                // exclude initialization nodes
+                identNodeName.start !== IPath.node.start &&
+                // and new replacement nodes, new node without start
+                IPath.node.start &&
+                currentFunction.scope.hasOwnBinding(IPath.node.name)
               ) {
-                identifiers.push(IPath)
+                const IPathParent = IPath.parentPath.parentPath.node
+
+                // If it is an assignment expression
+                // the current scope is saved
+                // the assignment always precedes the use
+                if (t.isVariableDeclaration(IPathParent)) {
+                  currentScope = IPath.scope
+                }
+
+                const isRefJsxValue = IPath.findParent(
+                  (item) =>
+                    t.isJSXAttribute(item.node) &&
+                    t.isJSXIdentifier(item.node.name) &&
+                    item.node.name.name === 'ref'
+                )
+
+                if (
+                  !t.isVariableDeclaration(IPathParent) &&
+                  !isRefJsxValue &&
+                  // If it is in the same scope as the assignment expression, it will not be processed
+                  currentScope?.block.start !== IPath.scope.block.start
+                ) {
+                  identifiers.push(IPath)
+                }
               }
             }
-          }
-        })
+          })
+        }
       }
 
       macro(
