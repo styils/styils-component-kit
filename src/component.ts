@@ -1,11 +1,9 @@
-import { NodePath } from '@babel/core'
-import { MParams } from './types'
+import { NodePath } from '@babel/traverse'
+
 import * as t from '@babel/types'
 
-export function component(path: NodePath, options: MParams) {
-  const { opts } = options
-
-  if (opts.frame === 'vue') {
+export function component(path: NodePath, frame: string) {
+  if (frame === 'vue') {
     if (
       t.isCallExpression(path.parentPath.node) &&
       (t.isArrowFunctionExpression(path.parentPath.node.arguments[0]) ||

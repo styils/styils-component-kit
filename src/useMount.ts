@@ -3,31 +3,27 @@ import { MParams } from './types'
 import * as t from '@babel/types'
 
 export function useMount(path: NodePath, options: MParams) {
-  const { opts, addImportName } = options
-
-  if (!t.isCallExpression(path.parentPath.node)) {
-    return
-  }
+  const { opts, addImportName, currentCallExpression } = options
 
   switch (opts.frame) {
     case 'react':
       {
-        const nameId = addImportName(path, 'useEffect', 'react')
+        const nameId = addImportName('useEffect', 'react')
 
         path.replaceWith(nameId)
-        path.parentPath.node.arguments.push(t.arrayExpression([]))
+        currentCallExpression.node.arguments.push(t.arrayExpression([]))
       }
       break
     case 'vue':
       {
-        const nameId = addImportName(path, 'onMounted', 'vue')
+        const nameId = addImportName('onMounted', 'vue')
 
         path.replaceWith(nameId)
       }
       break
     case 'solid':
       {
-        const nameId = addImportName(path, 'onMount', 'solid-js')
+        const nameId = addImportName('onMount', 'solid-js')
 
         path.replaceWith(nameId)
       }

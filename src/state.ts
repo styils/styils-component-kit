@@ -23,14 +23,14 @@ export function state(path: NodePath, options: MParams, variableMaps: Set<string
     switch (opts.frame) {
       case 'react':
         {
-          const nameId = addImportName(path, 'useState', 'react')
+          const nameId = addImportName('useState', 'react')
           variableMaps.add(variable.name)
           path.replaceWith(nameId)
         }
         break
       case 'vue':
         {
-          const nameId = addImportName(path, 'ref', 'vue')
+          const nameId = addImportName('ref', 'vue')
 
           // use const to create ref
           currentVariableDeclaration.replaceWith(
@@ -87,7 +87,7 @@ export function state(path: NodePath, options: MParams, variableMaps: Set<string
         break
       case 'solid':
         {
-          const nameId = addImportName(path, 'createSignal', 'solid-js')
+          const nameId = addImportName('createSignal', 'solid-js')
           path.replaceWith(nameId)
 
           const setBlock = new Map<NodePath<t.Function>, number>()
@@ -105,7 +105,7 @@ export function state(path: NodePath, options: MParams, variableMaps: Set<string
             }
           })
 
-          const nameBatchId = addImportName(path, 'batch', 'solid-js')
+          const nameBatchId = addImportName('batch', 'solid-js')
 
           setBlock.forEach((item, SPath) => {
             if (item > 1) {

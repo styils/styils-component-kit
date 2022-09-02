@@ -22,12 +22,32 @@ export default createMacro(({ references, state: babelState }) => {
    * Used to get all props state, auto-populate react deps
    */
   const variableMaps = new Set([])
+  const { component: Icomponent = [], ...macros } = references
+
+  const createAddImportPath = (path: NodePath) => (name: string, source: string) => {
+    const cacheCode = babelState.file.code + name
+
+    const nameId = hookCacheId.get(cacheCode) ?? addNamed(path, name, source)
+    hookCacheId.set(cacheCode, nameId)
+
+    return nameId
+  }
+
+  // component always stays first
+  Icomponent.forEach((path) => {
+    if (!t.isCallExpression(path.parentPath.node)) {
+      // Macros must be called directly, otherwise the correct call cannot be traced
+      throw new Error('All macros must be called')
+    }
+
+    component(path, (babelState.opts as { frame: string }).frame)
+  })
 
   // Idenifier needs to be obtained so the order is fixed
-  const macros = [component, state, proper, ref, useMount, useMemo, useWatchEffect]
+  const macroStateMethods = [state, proper, ref]
 
-  macros.forEach((macro) => {
-    references[macro.name]?.forEach((path) => {
+  macroStateMethods.forEach((macro) => {
+    macros[macro.name]?.forEach((path) => {
       if (!t.isCallExpression(path.parentPath.node)) {
         // Macros must be called directly, otherwise the correct call cannot be traced
         throw new Error('All macros must be called')
@@ -142,14 +162,7 @@ export default createMacro(({ references, state: babelState }) => {
         path,
         {
           // `import .. form ..` helper method
-          addImportName: (path: NodePath, name: string, source: string) => {
-            const cacheCode = babelState.file.code + name
-
-            const nameId = hookCacheId.get(cacheCode) ?? addNamed(path, name, source)
-            hookCacheId.set(cacheCode, nameId)
-
-            return nameId
-          },
+          addImportName: createAddImportPath(path),
           currentFunction,
           currentCallExpression,
           currentVariableDeclaration,
@@ -158,6 +171,31 @@ export default createMacro(({ references, state: babelState }) => {
           setIdentifiers,
 
           ...babelState
+        },
+        variableMaps
+      )
+    })
+  })
+
+  const macroHookMethods = [useMount, useMemo, useWatchEffect]
+
+  macroHookMethods.forEach((macro) => {
+    macros[macro.name]?.forEach((path) => {
+      if (!t.isCallExpression(path.parentPath.node)) {
+        // Macros must be called directly, otherwise the correct call cannot be traced
+        throw new Error('All macros must be called')
+      }
+
+      const currentCallExpression = path.findParent((p) =>
+        t.isCallExpression(p)
+      ) as MParams['currentCallExpression']
+
+      macro(
+        path,
+        {
+          currentCallExpression,
+          ...babelState, // `import .. form ..` helper method
+          addImportName: createAddImportPath(path)
         },
         variableMaps
       )

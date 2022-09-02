@@ -35,14 +35,14 @@ export function proper(path: NodePath, options: MParams, idxMaps: Set<string>) {
       break
     case 'vue':
       {
-        const hookToRefsId = addImportName(path, 'toRefs', 'vue')
+        const hookToRefsId = addImportName('toRefs', 'vue')
 
         path.parentPath.replaceWith(
           t.callExpression(hookToRefsId, [
             // If there is a need to merge props you need to set readonly and reactive to keep responsive
             defaultProps
-              ? t.callExpression(addImportName(path, 'readonly', 'vue'), [
-                  t.callExpression(addImportName(path, 'reactive', 'vue'), [mergeProps])
+              ? t.callExpression(addImportName('readonly', 'vue'), [
+                  t.callExpression(addImportName('reactive', 'vue'), [mergeProps])
                 ])
               : mergeProps
           ])
@@ -135,7 +135,7 @@ export function proper(path: NodePath, options: MParams, idxMaps: Set<string>) {
       break
     case 'solid':
       {
-        const nameId = addImportName(path, 'splitProps', 'solid-js')
+        const nameId = addImportName('splitProps', 'solid-js')
 
         let restElement: t.Identifier | null = null
         const statementNames = variableDeclaratorProperties.reduce((memo, item) => {
@@ -159,10 +159,7 @@ export function proper(path: NodePath, options: MParams, idxMaps: Set<string>) {
         path.parentPath.replaceWith(
           t.callExpression(nameId, [
             defaultProps
-              ? t.callExpression(addImportName(path, 'mergeProps', 'solid-js'), [
-                  defaultProps,
-                  props
-                ])
+              ? t.callExpression(addImportName('mergeProps', 'solid-js'), [defaultProps, props])
               : props,
             t.arrayExpression(
               Object.keys(statementNames).map((item) => t.stringLiteral(statementNames[item].key))

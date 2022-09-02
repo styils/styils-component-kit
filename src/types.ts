@@ -16,13 +16,13 @@ export interface MParams extends PluginPass {
   opts: {
     frame?: Frame
   }
-  addImportName: (path: NodePath, name: string, source: string) => Identifier
-  currentVariableDeclaration: NodePath<VariableDeclaration>
-  currentCallExpression: NodePath<CallExpression>
-  currentVariableDeclarator: Node
-  currentFunction: NodePath<
+  addImportName: (name: string, source: string) => Identifier
+  currentVariableDeclaration?: NodePath<VariableDeclaration>
+  currentCallExpression?: NodePath<CallExpression>
+  currentVariableDeclarator?: Node
+  currentFunction?: NodePath<
     FunctionDeclaration | FunctionExpression | ObjectMethod | ArrowFunctionExpression
   >
-  setIdentifiers: NodePath<CallExpression>[]
-  identifiers: NodePath<Identifier>[]
+  setIdentifiers?: NodePath<CallExpression>[]
+  identifiers?: NodePath<Identifier>[]
 }

@@ -8,7 +8,7 @@ export function ref(path: NodePath, options: MParams) {
   switch (opts.frame) {
     case 'react':
       {
-        const nameId = addImportName(path, 'useRef', 'react')
+        const nameId = addImportName('useRef', 'react')
         currentCallExpression.replaceWith(
           t.callExpression(nameId, currentCallExpression.node.arguments)
         )
@@ -20,7 +20,7 @@ export function ref(path: NodePath, options: MParams) {
       break
     case 'vue':
       {
-        const nameId = addImportName(path, 'ref', 'vue')
+        const nameId = addImportName('ref', 'vue')
         path.parentPath.replaceWith(t.callExpression(nameId, currentCallExpression.node.arguments))
 
         identifiers.forEach((item) => {
