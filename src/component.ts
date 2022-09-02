@@ -1,9 +1,9 @@
 import { NodePath } from '@babel/traverse'
-
+import { Frame } from './types'
 import * as t from '@babel/types'
 
 export function component(path: NodePath, frame: string) {
-  if (frame === 'vue') {
+  if (frame === Frame.vue) {
     if (
       t.isCallExpression(path.parentPath.node) &&
       (t.isArrowFunctionExpression(path.parentPath.node.arguments[0]) ||

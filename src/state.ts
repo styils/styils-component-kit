@@ -1,6 +1,6 @@
 import * as t from '@babel/types'
 import { NodePath } from '@babel/core'
-import { MParams } from './types'
+import { MParams, Frame } from './types'
 
 export function state(path: NodePath, options: MParams, variableMaps: Set<string>) {
   const {
@@ -21,14 +21,14 @@ export function state(path: NodePath, options: MParams, variableMaps: Set<string
     const [variable] = currentVariableDeclarator.id.elements as t.Identifier[]
 
     switch (opts.frame) {
-      case 'react':
+      case Frame.react:
         {
           const nameId = addImportName('useState', 'react')
           variableMaps.add(variable.name)
           path.replaceWith(nameId)
         }
         break
-      case 'vue':
+      case Frame.vue:
         {
           const nameId = addImportName('ref', 'vue')
 
@@ -85,7 +85,7 @@ export function state(path: NodePath, options: MParams, variableMaps: Set<string
           })
         }
         break
-      case 'solid':
+      case Frame.solid:
         {
           const nameId = addImportName('createSignal', 'solid-js')
           path.replaceWith(nameId)

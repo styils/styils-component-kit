@@ -1,12 +1,12 @@
 import type { NodePath } from '@babel/core'
-import { MParams } from './types'
+import { MParams, Frame } from './types'
 import * as t from '@babel/types'
 
 export function useWatchEffect(path: NodePath, options: MParams, variableMaps: Set<string>) {
   const { opts, addImportName, currentCallExpression } = options
 
   switch (opts.frame) {
-    case 'react':
+    case Frame.react:
       {
         const nameId = addImportName('useEffect', 'react')
         path.replaceWith(nameId)
@@ -24,13 +24,13 @@ export function useWatchEffect(path: NodePath, options: MParams, variableMaps: S
         path.replaceWith(nameId)
       }
       break
-    case 'vue':
+    case Frame.vue:
       {
         const nameId = addImportName('watchEffect', 'vue')
         path.replaceWith(nameId)
       }
       break
-    case 'solid':
+    case Frame.solid:
       {
         const nameId = addImportName('createEffect', 'solid-js')
         path.replaceWith(nameId)

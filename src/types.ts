@@ -10,7 +10,11 @@ import type {
   VariableDeclaration
 } from '@babel/types'
 
-type Frame = 'vue' | 'react' | 'solid'
+export enum Frame {
+  vue = 'vue',
+  react = 'react',
+  solid = 'solid'
+}
 
 export interface MParams extends PluginPass {
   opts: {

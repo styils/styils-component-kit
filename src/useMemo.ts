@@ -1,12 +1,12 @@
 import type { NodePath } from '@babel/core'
-import { MParams } from './types'
+import { MParams, Frame } from './types'
 import * as t from '@babel/types'
 
 export function useMemo(path: NodePath, options: MParams, variableMaps: Set<string>) {
   const { opts, addImportName, currentCallExpression } = options
 
   switch (opts.frame) {
-    case 'react':
+    case Frame.react:
       {
         const nameId = addImportName('useMemo', 'react')
         const deps = []
@@ -22,14 +22,14 @@ export function useMemo(path: NodePath, options: MParams, variableMaps: Set<stri
         path.replaceWith(nameId)
       }
       break
-    case 'vue':
+    case Frame.vue:
       {
         const nameId = addImportName('computed', 'vue')
         path.replaceWith(nameId)
         currentCallExpression.node.arguments[1] = null
       }
       break
-    case 'solid':
+    case Frame.solid:
       {
         const nameId = addImportName('createMemo', 'solid-js')
         path.replaceWith(nameId)

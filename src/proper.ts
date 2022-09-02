@@ -1,5 +1,5 @@
 import type { NodePath } from '@babel/core'
-import { MParams } from './types'
+import { MParams, Frame } from './types'
 import * as t from '@babel/types'
 
 export function proper(path: NodePath, options: MParams, idxMaps: Set<string>) {
@@ -31,10 +31,10 @@ export function proper(path: NodePath, options: MParams, idxMaps: Set<string>) {
     : props
 
   switch (opts.frame) {
-    case 'react':
+    case Frame.react:
       path.parentPath.replaceWith(mergeProps)
       break
-    case 'vue':
+    case Frame.vue:
       {
         const hookToRefsId = addImportName('toRefs', 'vue')
 
@@ -148,7 +148,7 @@ export function proper(path: NodePath, options: MParams, idxMaps: Set<string>) {
         })
       }
       break
-    case 'solid':
+    case Frame.solid:
       {
         const nameId = addImportName('splitProps', 'solid-js')
 

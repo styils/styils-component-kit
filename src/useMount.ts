@@ -1,12 +1,12 @@
 import type { NodePath } from '@babel/core'
-import { MParams } from './types'
+import { MParams, Frame } from './types'
 import * as t from '@babel/types'
 
 export function useMount(path: NodePath, options: MParams) {
   const { opts, addImportName, currentCallExpression } = options
 
   switch (opts.frame) {
-    case 'react':
+    case Frame.react:
       {
         const nameId = addImportName('useEffect', 'react')
 
@@ -14,14 +14,14 @@ export function useMount(path: NodePath, options: MParams) {
         currentCallExpression.node.arguments.push(t.arrayExpression([]))
       }
       break
-    case 'vue':
+    case Frame.vue:
       {
         const nameId = addImportName('onMounted', 'vue')
 
         path.replaceWith(nameId)
       }
       break
-    case 'solid':
+    case Frame.solid:
       {
         const nameId = addImportName('onMount', 'solid-js')
 
