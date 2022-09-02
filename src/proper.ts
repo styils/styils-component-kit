@@ -6,6 +6,7 @@ export function proper(path: NodePath, options: MParams, idxMaps: Set<string>) {
   const { opts, addImportName, currentVariableDeclarator, currentCallExpression, currentFunction } =
     options
 
+  // must be deconstructed
   if (
     t.isVariableDeclarator(currentVariableDeclarator) &&
     t.isObjectPattern(currentVariableDeclarator.id)
@@ -74,13 +75,27 @@ export function proper(path: NodePath, options: MParams, idxMaps: Set<string>) {
           Identifier(IPath) {
             if (
               statementNames[IPath.node.name] &&
-              // exclude initialization nodes
-              statementNames[IPath.node.name] !== IPath.node.start &&
-              // and new replacement nodes, new node without start
-              IPath.node.start &&
               !t.isObjectProperty(IPath.parentPath) &&
-              currentFunction.scope.hasOwnBinding(IPath.node.name)
+              !t.isVariableDeclarator(IPath.parentPath.node)
             ) {
+              let scoper = IPath.scope
+
+              while (true) {
+                if (!scoper) {
+                  break
+                }
+
+                if (scoper.hasOwnBinding(IPath.node.name)) {
+                  if (scoper.block.start === path.scope.block.start) {
+                    break
+                  } else {
+                    return
+                  }
+                }
+
+                scoper = scoper.parent
+              }
+
               Identifiers.push(IPath)
             }
 

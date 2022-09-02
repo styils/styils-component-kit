@@ -54,6 +54,10 @@ describe('macro state', () => {
         function hello(){
           let count = 1
           count++
+
+          if (a == 1){
+            count++
+          }
         }
 
         function foo(){

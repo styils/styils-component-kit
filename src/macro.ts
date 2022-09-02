@@ -1,7 +1,7 @@
 import { createMacro } from 'babel-plugin-macros'
 import * as t from '@babel/types'
 import { addNamed } from '@babel/helper-module-imports'
-import type { NodePath, Scope } from '@babel/traverse'
+import type { NodePath } from '@babel/traverse'
 import type { MParams } from './types'
 import { component } from './component'
 import { state } from './state'
@@ -66,7 +66,6 @@ export default createMacro(({ references, state: babelState }) => {
 
       const identifiers: NodePath<t.Identifier>[] = []
       const setIdentifiers: NodePath<t.CallExpression>[] = []
-      let currentScope: Scope
 
       if (t.isVariableDeclarator(currentVariableDeclarator)) {
         if (
@@ -103,7 +102,7 @@ export default createMacro(({ references, state: babelState }) => {
             }
           }
 
-          currentFunction?.traverse({
+          currentFunction.traverse({
             Identifier(IPath) {
               if (
                 setIdentNode &&
@@ -126,15 +125,28 @@ export default createMacro(({ references, state: babelState }) => {
                 identNodeName.start !== IPath.node.start &&
                 // and new replacement nodes, new node without start
                 IPath.node.start &&
+                !t.isVariableDeclaration(IPath.parentPath.node) &&
                 currentFunction.scope.hasOwnBinding(IPath.node.name)
               ) {
-                const IPathParent = IPath.parentPath.parentPath.node
-
                 // If it is an assignment expression
                 // the current scope is saved
                 // the assignment always precedes the use
-                if (t.isVariableDeclaration(IPathParent)) {
-                  currentScope = IPath.scope
+                let scoper = IPath.scope
+
+                while (true) {
+                  if (!scoper) {
+                    break
+                  }
+
+                  if (scoper.hasOwnBinding(IPath.node.name)) {
+                    if (scoper.block.start === path.scope.block.start) {
+                      break
+                    } else {
+                      return
+                    }
+                  }
+
+                  scoper = scoper.parent
                 }
 
                 const isRefJsxValue = IPath.findParent(
@@ -144,12 +156,7 @@ export default createMacro(({ references, state: babelState }) => {
                     item.node.name.name === 'ref'
                 )
 
-                if (
-                  !t.isVariableDeclaration(IPathParent) &&
-                  !isRefJsxValue &&
-                  // If it is in the same scope as the assignment expression, it will not be processed
-                  currentScope?.block.start !== IPath.scope.block.start
-                ) {
+                if (!isRefJsxValue) {
                   identifiers.push(IPath)
                 }
               }

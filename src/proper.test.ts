@@ -51,6 +51,16 @@ describe('use props', () => {
     export default (props) => {
       const {foo, bar} = proper(props)
 
+      function onclick(){
+        let foo = 0
+
+        if (a == 1){
+          if (b == 2){
+            foo++
+          }
+        }
+      }
+
       return (
         <button>
           Clicked {foo} {bar === 1 ? 'time' : 'times'}

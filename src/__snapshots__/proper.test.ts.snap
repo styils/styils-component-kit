@@ -31,6 +31,16 @@ exports[`use props base vue 1`] = `
 export default (props) => {
   const { foo, bar } = _toRefs(props);
 
+  function onclick() {
+    let foo = 0;
+
+    if (a == 1) {
+      if (b == 2) {
+        foo++;
+      }
+    }
+  }
+
   return (
     <button>
       Clicked {foo.value} {bar.value === 1 ? "time" : "times"}
