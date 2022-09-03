@@ -17,5 +17,5 @@
       "test/*": ["test"]
     }
   },
-  "include": ["src", "types.d.ts", "src/.ts"]
+  "include": ["helper", "types.d.ts"]
 }

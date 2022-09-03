@@ -69,14 +69,8 @@ importers:
       ts-node: 10.9.1_uqcjasetfb2qtjw4un7qj6ps2e
       typescript: 4.8.2
 
-  packages/babel-plugin-vue:
-    specifiers:
-      '@babel/helper-plugin-utils': ^7.18.9
-      '@types/babel__helper-plugin-utils': ^7.10.0
-    dependencies:
-      '@babel/helper-plugin-utils': 7.18.9
-    devDependencies:
-      '@types/babel__helper-plugin-utils': 7.10.0
+  packages/system:
+    specifiers: {}
 
 packages:
 
@@ -190,6 +184,7 @@ packages:
   /@babel/helper-plugin-utils/7.18.9:
     resolution: {integrity: sha512-aBXPT3bmtLryXaoJLyYPXPlSD4p1ld9aYeR+sJNOZjJJGiOpb+fKfh3NkcCu7J54nUJwCERPBExCCpyCOHnu/w==}
     engines: {node: '>=6.9.0'}
+    dev: true
 
   /@babel/helper-simple-access/7.18.6:
     resolution: {integrity: sha512-iNpIgTgyAvDQpDj76POqg+YEt8fPxx3yaNBg3S30dxNKm2SWfYhD0TGrK/Eu9wHpUW63VQU894TsTg+GLbUa1g==}
@@ -1222,12 +1217,6 @@ packages:
     resolution: {integrity: sha512-tFkciB9j2K755yrTALxD44McOrk+gfpIpvC3sxHjRawj6PfnQxrse4Clq5y/Rq+G3mrBurMax/lG8Qn2t9mSsg==}
     dependencies:
       '@babel/types': 7.18.13
-    dev: true
-
-  /@types/babel__helper-plugin-utils/7.10.0:
-    resolution: {integrity: sha512-60YtHzhQ9HAkToHVV+TB4VLzBn9lrfgrsOjiJMtbv/c1jPdekBxaByd6DMsGBzROXWoIL6U3lEFvvbu69RkUoA==}
-    dependencies:
-      '@types/babel__core': 7.1.19
     dev: true
 
   /@types/babel__template/7.4.1:
