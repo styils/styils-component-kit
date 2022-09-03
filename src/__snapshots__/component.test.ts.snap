@@ -1,14 +1,15 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`use component base react 1`] = `
-"export default (props) => {
+"import { forwardRef as _forwardRef } from "react";
+export default _forwardRef((props, _ref_) => {
   const { foo, bar, ...rest } = props;
   return (
     <button {...rest}>
       Clicked {foo} {bar === 1 ? "time" : "times"}
     </button>
   );
-};
+});
 "
 `;
 

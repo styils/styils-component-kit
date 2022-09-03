@@ -35,7 +35,7 @@ export default createMacro(({ references, state: babelState }) => {
 
   // component always stays first
   Icomponent.forEach((path) => {
-    component(path, (babelState.opts as { frame: string }).frame)
+    component(path, (babelState.opts as { frame: string }).frame, createAddImportPath(path))
   })
 
   Iproper.forEach((path) => {
