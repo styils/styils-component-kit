@@ -6,7 +6,9 @@ export function proper(path: NodePath, options: MParams, variableMaps: Set<strin
   const { opts, addImportName } = options
   // currentVariableDeclarator, currentCallExpression, currentFunction
   // must be deconstructed
-  const currentFunction = path.getFunctionParent() as MParams['currentFunction']
+  const currentFunction = path.getFunctionParent() as NodePath<
+    t.FunctionDeclaration | t.FunctionExpression | t.ObjectMethod | t.ArrowFunctionExpression
+  >
 
   if (
     t.isVariableDeclarator(path.parentPath.parentPath.node) &&

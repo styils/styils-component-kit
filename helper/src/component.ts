@@ -1,6 +1,5 @@
-import { NodePath } from '@babel/traverse'
-
-import { Frame, MParams } from './types'
+import { Frame, type MParams } from './types'
+import type { NodePath } from '@babel/core'
 import * as t from '@babel/types'
 
 export function component(path: NodePath, frame: string, addImportName: MParams['addImportName']) {
