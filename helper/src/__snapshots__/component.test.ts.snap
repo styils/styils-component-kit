@@ -2,10 +2,10 @@
 
 exports[`use component base react 1`] = `
 "import { forwardRef as _forwardRef } from "react";
-export default _forwardRef((props, _ref_) => {
+export default _forwardRef((props, ref) => {
   const { foo, bar, ...rest } = props;
   return (
-    <button {...rest}>
+    <button {...rest} ref={ref}>
       Clicked {foo} {bar === 1 ? "time" : "times"}
     </button>
   );
@@ -16,11 +16,11 @@ export default _forwardRef((props, _ref_) => {
 exports[`use component base solid 1`] = `
 "import { splitProps as _splitProps } from "solid-js";
 
-const button = (props) => {
+const button = (props, ref) => {
   const [_local_, rest] = _splitProps(props, ["foo", "bar"]);
 
   return (
-    <button {...rest}>
+    <button {...rest} ref={ref}>
       Clicked {_local_.foo} {_local_.bar === 1 ? "time" : "times"}
     </button>
   );

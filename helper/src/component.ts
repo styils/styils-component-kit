@@ -21,18 +21,29 @@ export function component(path: NodePath, frame: string, addImportName: MParams[
       {
         const nameId = addImportName('forwardRef', 'react')
 
-        path.parentPath.node.arguments[0].params.push(t.identifier('_ref_'))
         path.parentPath.replaceWith(t.callExpression(nameId, path.parentPath.node.arguments))
       }
       break
     case Frame.vue:
       {
-        const { start } = path.parentPath.node.arguments[0]
+        const { start, params } = path.parentPath.node.arguments[0]
         // Convert `return jsx` to `return () => jsx`
         path.parentPath.traverse({
           ReturnStatement(RPath) {
             if (RPath.getFunctionParent().node.start === start) {
               RPath.replaceWith(t.arrowFunctionExpression([], RPath.node.argument))
+            }
+          },
+          JSXAttribute(JPath) {
+            if (
+              t.isIdentifier(params[1]) &&
+              JPath.node.name.name === 'ref' &&
+              JPath.node.value &&
+              t.isJSXExpressionContainer(JPath.node.value) &&
+              t.isIdentifier(JPath.node.value.expression) &&
+              JPath.node.value.expression.name === params[1].name
+            ) {
+              JPath.remove()
             }
           }
         })
@@ -45,7 +56,7 @@ export function component(path: NodePath, frame: string, addImportName: MParams[
               'method',
               t.identifier('setup'),
               [
-                t.identifier('props'),
+                t.identifier((path.parentPath.node.arguments[0].params[0] as t.Identifier).name),
                 t.objectPattern([
                   t.objectProperty(t.identifier('attrs'), t.identifier('_attrs_')),
                   t.objectProperty(t.identifier('slots'), t.identifier('_slots_')),

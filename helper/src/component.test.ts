@@ -28,11 +28,11 @@ describe('use component', () => {
       `
     import { component, proper } from 'macro'
 
-    export default component((props) => {
+    export default component((props, ref) => {
       const {foo, bar, children, ...rest} = proper(props)
 
       return (
-        <button {...rest}>
+        <button {...rest} ref={ref}>
           Clicked {foo} {bar === 1 ? 'time' : 'times'}
           {children}
         </button>
@@ -50,11 +50,11 @@ describe('use component', () => {
       `
     import { component, proper } from 'macro'
 
-    export default component((props) => {
+    export default component((props, ref) => {
       const {foo, bar, ...rest} = proper(props)
 
       return (
-        <button {...rest}>
+        <button {...rest} ref={ref}>
           Clicked {foo} {bar === 1 ? 'time' : 'times'}
         </button>
       )
@@ -71,11 +71,11 @@ describe('use component', () => {
       `
     import { component, proper } from 'macro'
 
-    const button = component((props) => {
+    const button = component((props, ref) => {
       const {foo, bar, ...rest} = proper(props)
 
       return (
-        <button {...rest}>
+        <button {...rest} ref={ref}>
           Clicked {foo} {bar === 1 ? 'time' : 'times'}
         </button>
       )
